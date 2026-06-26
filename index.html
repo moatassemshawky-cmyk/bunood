@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bunood — coming soon</title>
+<meta name="description" content="Automated BOQ estimation for Egyptian construction. Upload a bill of quantities — every line item is classified and priced from real market data.">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --graphite:#2C313A; --blue:#2F6FE0; --blue2:#6FA0F0; --grey:#9AA3AE;
+    --mist:#F3F5F7; --white:#fff; --line:rgba(44,49,58,.10);
+    --font-en:"Readex Pro",system-ui,sans-serif; --font-ar:"IBM Plex Sans Arabic",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-en); color:var(--graphite); background:var(--mist);
+    min-height:100vh; display:flex; flex-direction:column; line-height:1.55;
+    background-image:
+      radial-gradient(120% 90% at 80% -10%, rgba(47,111,224,.08), transparent 60%),
+      linear-gradient(var(--line) 1px,transparent 1px),
+      linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:auto, 28px 28px, 28px 28px;
+  }
+  html[dir="rtl"] body{font-family:var(--font-ar)}
+  .wrap{width:100%; max-width:1100px; margin:0 auto; padding:0 clamp(20px,5vw,40px)}
+  nav{display:flex; align-items:center; justify-content:space-between; padding:26px 0}
+  .brand{display:flex; align-items:center; gap:13px; direction:ltr}
+  .brand svg{width:42px;height:42px;flex:none}
+  .brand .wm{font-family:var(--font-en);font-weight:600;font-size:26px;color:var(--graphite)}
+  .brand .wm .oo{color:var(--blue)}
+  .toggle{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--white);font-family:var(--mono);font-size:12px}
+  .toggle button{border:0;background:transparent;padding:8px 14px;cursor:pointer;color:var(--grey);font-family:inherit;font-size:inherit;transition:.15s}
+  .toggle button.on{background:var(--graphite);color:var(--white)}
+  main{flex:1;display:flex;align-items:center;padding:clamp(20px,5vw,56px) 0}
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,6vw,64px);align-items:center;width:100%}
+  @media(max-width:860px){.hero{grid-template-columns:1fr;gap:40px}}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px;font-family:var(--mono);font-size:12px;color:var(--graphite);margin-bottom:22px}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,111,224,.45)}70%{box-shadow:0 0 0 8px rgba(47,111,224,0)}100%{box-shadow:0 0 0 0 rgba(47,111,224,0)}}
+  h1{font-family:var(--font-en);font-weight:600;font-size:clamp(30px,5.4vw,52px);line-height:1.12;letter-spacing:-.01em;margin-bottom:18px}
+  html[dir="rtl"] h1{font-family:var(--font-ar);letter-spacing:0;line-height:1.25}
+  h1 .hl{color:var(--blue)}
+  .sub{font-size:clamp(15px,2.2vw,18px);color:#525a66;max-width:46ch;margin-bottom:30px}
+  form.ea{display:flex;gap:10px;max-width:440px;flex-wrap:wrap}
+  form.ea input{flex:1;min-width:200px;font-family:inherit;font-size:15px;color:var(--graphite);
+    background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px 16px;outline:none;transition:.15s}
+  form.ea input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,224,.14)}
+  form.ea button{font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;border:0;background:var(--graphite);
+    color:var(--white);border-radius:10px;padding:14px 24px;transition:.18s;white-space:nowrap}
+  form.ea button:hover{background:var(--blue)}
+  .msg{margin-top:12px;font-size:14px;color:var(--blue);min-height:20px;font-weight:500}
+  .hint{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--grey)}
+  .ledger{background:var(--white);border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 30px 60px -40px rgba(44,49,58,.5);padding:22px;position:relative;overflow:hidden}
+  .ledger .lh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .ledger .lh .t{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  .ledger .lh .dots{display:flex;gap:6px}
+  .ledger .lh .dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px}
+  .row .nm{flex:1;font-size:14px;color:var(--graphite);direction:ltr;text-align:left}
+  html[dir="rtl"] .row .nm{direction:rtl;text-align:right;font-family:var(--font-ar)}
+  .row .q{font-family:var(--mono);font-size:12px;color:var(--grey)}
+  .row .pr{font-family:var(--mono);font-size:13px;color:var(--graphite);min-width:96px;text-align:right;direction:ltr;font-variant-numeric:tabular-nums}
+  .row.active{background:rgba(47,111,224,.08)}
+  .row.active .pr{color:var(--blue);font-weight:500}
+  .row.active .nm{color:var(--blue);font-weight:500}
+  .row.anim{opacity:0;transform:translateY(8px);animation:rowin .5s forwards}
+  @keyframes rowin{to{opacity:1;transform:translateY(0)}}
+  .scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);
+    top:64px;opacity:0;animation:scan 6s linear infinite}
+  @keyframes scan{0%{top:64px;opacity:0}10%{opacity:.9}90%{opacity:.9}100%{top:92%;opacity:0}}
+  .total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+  .total .lbl{font-size:13px;color:var(--grey)}
+  .total .val{font-family:var(--mono);font-weight:500;font-size:16px;color:var(--graphite);direction:ltr}
+  footer{padding:24px 0;border-top:1px solid var(--line)}
+  .fin{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--grey)}
+  .fin a{color:var(--grey);text-decoration:none}.fin a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand">
+      <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="bunood">
+        <g stroke="#2F6FE0" stroke-width="7" stroke-linecap="round" fill="none">
+          <path d="M20 38 V23 Q20 20 23 20 H38"/><path d="M76 58 V73 Q76 76 73 76 H58"/>
+        </g>
+        <g stroke-width="6.5" stroke-linecap="round">
+          <line x1="33" y1="38" x2="66" y2="38" stroke="#2C313A"/>
+          <line x1="33" y1="48" x2="58" y2="48" stroke="#2F6FE0"/>
+          <line x1="33" y1="58" x2="63" y2="58" stroke="#2C313A"/>
+        </g>
+      </svg>
+      <span class="wm">bun<span class="oo">oo</span>d</span>
+    </div>
+    <div class="toggle">
+      <button id="btn-ar" type="button">ع</button>
+      <button id="btn-en" class="on" type="button">EN</button>
+    </div>
+  </nav>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div class="copy">
+        <span class="chip"><span class="dot"></span><span data-en="Coming soon · 2026" data-ar="قريبًا · ٢٠٢٦">Coming soon · 2026</span></span>
+        <h1 data-en='Automated BOQ estimation for <span class="hl">Egyptian construction.</span>'
+            data-ar='تسعير <span class="hl">بنود المقايسات</span> تلقائيًا.'>Automated BOQ estimation for <span class="hl">Egyptian construction.</span></h1>
+        <p class="sub" data-en="Upload a bill of quantities. Every line item is classified and priced from real Egyptian market data — in minutes, not days."
+           data-ar="ارفع المقايسة. كل بند يتصنّف ويتسعّر من بيانات السوق المصري الفعلية — في دقائق، مش أيام.">Upload a bill of quantities. Every line item is classified and priced from real Egyptian market data — in minutes, not days.</p>
+
+        <form class="ea" id="eaForm" novalidate>
+          <input type="email" id="email" required placeholder="your@email.com" autocomplete="email"
+                 data-en-ph="your@email.com" data-ar-ph="بريدك الإلكتروني">
+          <button type="submit" data-en="Get early access" data-ar="وصول مبكّر">Get early access</button>
+        </form>
+        <div class="msg" id="msg"></div>
+        <div class="hint" data-en="No spam. We'll email you when bunood opens." data-ar="من غير إزعاج. هنبعتلك أول ما بنود تفتح.">No spam. We'll email you when bunood opens.</div>
+      </div>
+
+      <div class="ledger" aria-hidden="true">
+        <div class="scan"></div>
+        <div class="lh">
+          <span class="t" data-en="BOQ · auto-priced" data-ar="مقايسة · تسعير تلقائي">BOQ · auto-priced</span>
+          <span class="dots"><i></i><i></i><i></i></span>
+        </div>
+        <div id="rows">
+          <div class="row"><span class="nm">Reinforced concrete</span><span class="q">42 m³</span><span class="pr">453,432</span></div>
+          <div class="row active"><span class="nm">Cement blocks 20cm</span><span class="q">1,200 u</span><span class="pr">15,432</span></div>
+          <div class="row"><span class="nm">Ceramic flooring</span><span class="q">310 m²</span><span class="pr">96,100</span></div>
+          <div class="row"><span class="nm">Electrical wiring</span><span class="q">1 ls</span><span class="pr">74,250</span></div>
+        </div>
+        <div class="total">
+          <span class="lbl" data-en="Estimated total" data-ar="الإجمالي التقديري">Estimated total</span>
+          <span class="val" id="total">639,214 EGP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fin">
+      <span>© 2026 bunood</span>
+      <span><a href="https://bunood.co">bunood.co</a> · <span data-en="Built in Egypt" data-ar="صُنع في مصر">Built in Egypt</span> 🇪🇬</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var ITEMS=[
+    {en:"Reinforced concrete", ar:"خرسانة مسلحة", q:"42 m³", price:453432, active:false},
+    {en:"Cement blocks 20cm",  ar:"طوب أسمنتي ٢٠سم", q:"1,200 u", price:15432, active:true},
+    {en:"Ceramic flooring",    ar:"أرضيات سيراميك", q:"310 m²", price:96100, active:false},
+    {en:"Electrical wiring",   ar:"تأسيس كهرباء", q:"1 ls", price:74250, active:false}
+  ];
+  function fmt(n){return n.toLocaleString('en-US');}
+
+  function setLang(l){
+    var html=document.documentElement;
+    html.lang=l; html.dir=(l==='ar')?'rtl':'ltr';
+    var ar=document.getElementById('btn-ar'), en=document.getElementById('btn-en');
+    if(ar) ar.classList.toggle('on', l==='ar');
+    if(en) en.classList.toggle('on', l==='en');
+    var nodes=document.querySelectorAll('[data-en]');
+    for(var i=0;i<nodes.length;i++){ nodes[i].innerHTML = nodes[i].getAttribute('data-'+l); }
+    var em=document.getElementById('email');
+    if(em) em.placeholder = em.getAttribute('data-'+l+'-ph');
+    document.title = (l==='ar') ? 'بنود — قريبًا' : 'bunood — coming soon';
+  }
+
+  function buildLedger(){
+    var l=document.documentElement.lang || 'en';
+    var rowsEl=document.getElementById('rows'), totalEl=document.getElementById('total');
+    if(!rowsEl) return;
+    rowsEl.innerHTML=''; var grand=0;
+    for(var i=0;i<ITEMS.length;i++){
+      var it=ITEMS[i]; grand+=it.price;
+      var r=document.createElement('div');
+      r.className='row anim'+(it.active?' active':'');
+      r.style.animationDelay=(0.2+i*0.45)+'s';
+      r.innerHTML='<span class="nm">'+(l==='ar'?it.ar:it.en)+'</span>'+
+                  '<span class="q">'+it.q+'</span>'+
+                  '<span class="pr" data-target="'+it.price+'">0</span>';
+      rowsEl.appendChild(r);
+    }
+    setTimeout(function(){
+      var prs=document.querySelectorAll('.pr');
+      for(var j=0;j<prs.length;j++){ (function(el){
+        var target=+el.getAttribute('data-target'), cur=0, step=target/28;
+        var t=setInterval(function(){cur+=step; if(cur>=target){cur=target;clearInterval(t);} el.textContent=fmt(Math.round(cur));},22);
+      })(prs[j]); }
+      var g=0, gt=grand, gs=gt/40;
+      var gi=setInterval(function(){g+=gs; if(g>=gt){g=gt;clearInterval(gi);} if(totalEl) totalEl.textContent=fmt(Math.round(g))+' EGP';},22);
+    }, 200+ITEMS.length*450);
+  }
+
+  function init(){
+    try{
+      var ar=document.getElementById('btn-ar'), en=document.getElementById('btn-en');
+      if(ar) ar.addEventListener('click', function(){ setLang('ar'); buildLedger(); });
+      if(en) en.addEventListener('click', function(){ setLang('en'); buildLedger(); });
+
+      var ENDPOINT=""; // paste your Formspree URL here to collect emails
+      var form=document.getElementById('eaForm');
+      if(form){ form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var l=document.documentElement.lang || 'en';
+        var email=(document.getElementById('email').value||'').trim();
+        var msg=document.getElementById('msg');
+        var ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if(!ok){ msg.style.color='#C0392B'; msg.textContent=(l==='ar'?'اكتب بريد صحيح':'Enter a valid email'); return; }
+        msg.style.color='var(--blue)';
+        if(ENDPOINT){ try{ fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({email:email})}); }catch(_){} }
+        msg.textContent=(l==='ar')?'✓ تمام! هنبعتلك أول ما نفتح.':"✓ You're on the list. We'll be in touch.";
+        form.reset();
+      }); }
+
+      buildLedger();
+    }catch(err){ if(window.console) console.error(err); }
+  }
+
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); }
+  else { init(); }
+})();
+</script>
+</body>
+</html>
