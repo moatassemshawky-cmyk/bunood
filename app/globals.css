@@ -43,17 +43,40 @@ body {
   overflow: hidden;
   background-color: var(--graphite-2);
   background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(rgba(16, 20, 30, 0.08), rgba(16, 20, 30, 0.18)),
+    url('/construction-bg.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
 }
-.bn-root::before {
-  /* soft vignette so the grid fades at the edges */
+.bn-root::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 80% at 50% 30%, transparent 40%, var(--graphite-2) 100%);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.08;
   pointer-events: none;
+}
+.bn-root::before {
+  /* softened vignette so the page content remains readable */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 30%, transparent 60%, rgba(16, 20, 30, 0.55) 100%);
+  pointer-events: none;
+}
+.bn-wrap {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+  z-index: 1;
+}
+.bn-hero {
+  padding-top: 80px;
 }
 
 .bn-wrap {
@@ -107,12 +130,16 @@ body {
 /* ---------- Hero layout ---------- */
 .bn-hero {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 1.25fr 0.75fr;
   gap: 56px;
   align-items: center;
 }
 .bn-left {
   max-width: 520px;
+}
+.bn-ledger {
+  margin-left: -24px;
+  max-width: calc(100% + 24px);
 }
 
 .bn-badge {
