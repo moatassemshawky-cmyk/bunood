@@ -8,9 +8,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
-  const client = createNeonClient();
-
+  let client;
   try {
+    client = createNeonClient();
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS early_access_signups (
         id SERIAL PRIMARY KEY,
@@ -27,11 +28,12 @@ export async function POST(request: Request) {
       [email.trim(), typeof whatsapp === 'string' ? whatsapp.trim() : null, typeof role === 'string' ? role : null, typeof lang === 'string' ? lang : null],
     );
 
-    await client.end();
-
     return NextResponse.json({ success: true, signup: result.rows[0] });
   } catch (error) {
-    await client.end();
     return NextResponse.json({ error: String(error) }, { status: 500 });
+  } finally {
+    if (client) {
+      await client.end();
+    }
   }
 }

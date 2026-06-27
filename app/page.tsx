@@ -365,7 +365,7 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
   const [msg, setMsg] = useState('');
 
   const submit = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('err'); setMsg(c.errBad); return; }
+    if (!/^[^\s@]+@[^^\s@]+\.[^\s@]+$/.test(email)) { setStatus('err'); setMsg(c.errBad); return; }
     setStatus('loading');
     try {
       const res = await fetch('/api/subscribe', {
@@ -373,9 +373,18 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, whatsapp: wa, role, lang }),
       });
-      if (!res.ok) throw new Error();
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const errorMsg = body?.error || c.errFail;
+        throw new Error(errorMsg);
+      }
+
       setStatus('ok'); setMsg(c.success); setEmail(''); setWa('');
-    } catch { setStatus('err'); setMsg(c.errFail); }
+    } catch (error) {
+      setStatus('err');
+      setMsg(error instanceof Error ? error.message : c.errFail);
+    }
   };
 
   if (status === 'ok') return <p className="bn-form-ok">✓ {msg}</p>;
