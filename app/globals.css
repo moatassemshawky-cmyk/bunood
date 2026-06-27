@@ -2,6 +2,9 @@
 @import "tailwindcss";
 
 :root {
+  --font-display: "Segoe UI", "Readex Pro", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-arabic: "Segoe UI", "IBM Plex Sans Arabic", "Noto Sans Arabic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
   --signal: #2f6fe0;
   --graphite: #2c313a;
   --graphite-2: #232831;
