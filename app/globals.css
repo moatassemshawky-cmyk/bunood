@@ -1,0 +1,327 @@
+/* Tailwind v4 (created by create-next-app). Keep this import. */
+@import "tailwindcss";
+
+:root {
+  --signal: #2f6fe0;
+  --graphite: #2c313a;
+  --graphite-2: #232831;
+  --cool: #7c8597;
+  --mist: #aab2c0;
+  --line: rgba(124, 133, 151, 0.18);
+  --paper: #1b1f27;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--graphite-2);
+  color: #e8ebf0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabic copy switches the body face when the page is RTL */
+[dir="rtl"] {
+  font-family: var(--font-arabic), system-ui, sans-serif;
+}
+
+/* ---------- Blueprint grid backdrop ---------- */
+.bn-root {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--graphite-2);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.bn-root::before {
+  /* soft vignette so the grid fades at the edges */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 30%, transparent 40%, var(--graphite-2) 100%);
+  pointer-events: none;
+}
+
+.bn-wrap {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+/* ---------- Header / logo ---------- */
+.bn-head {
+  padding: 8px 0 40px;
+}
+.bn-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.bn-word {
+  font-family: var(--font-mono), monospace;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #f2f4f8;
+}
+.bn-oo {
+  color: var(--signal);
+}
+
+/* ---------- Language toggle ---------- */
+.bn-langtoggle {
+  position: absolute;
+  top: 28px;
+  inset-inline-end: 28px;
+  z-index: 5;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--mist);
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.18s, color 0.18s;
+}
+.bn-langtoggle:hover {
+  border-color: var(--signal);
+  color: #fff;
+}
+
+/* ---------- Hero layout ---------- */
+.bn-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+}
+.bn-left {
+  max-width: 520px;
+}
+
+.bn-badge {
+  display: inline-block;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--signal);
+  border: 1px solid rgba(47, 111, 224, 0.4);
+  background: rgba(47, 111, 224, 0.08);
+  padding: 5px 11px;
+  border-radius: 6px;
+}
+[dir="rtl"] .bn-badge {
+  letter-spacing: normal;
+}
+
+.bn-h1 {
+  margin: 22px 0 18px;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  display: flex;
+  flex-direction: column;
+}
+[dir="rtl"] .bn-h1 {
+  letter-spacing: normal;
+  line-height: 1.2;
+}
+.bn-h1-accent {
+  color: var(--signal);
+}
+
+.bn-sub {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--mist);
+  margin: 0 0 28px;
+}
+
+/* ---------- Form ---------- */
+.bn-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bn-inputrow {
+  display: flex;
+  gap: 8px;
+}
+.bn-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 13px 15px;
+  color: #fff;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.bn-input::placeholder {
+  color: #6b7383;
+}
+.bn-input:focus-visible {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgba(47, 111, 224, 0.25);
+}
+.bn-btn {
+  background: var(--signal);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.08s;
+}
+.bn-btn:hover {
+  background: #2560c9;
+}
+.bn-btn:active {
+  transform: translateY(1px);
+}
+.bn-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.bn-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.bn-msg {
+  font-size: 13px;
+  color: #ff8a8a;
+}
+.bn-success {
+  font-size: 16px;
+  color: #6fe0a8;
+  background: rgba(111, 224, 168, 0.08);
+  border: 1px solid rgba(111, 224, 168, 0.3);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.bn-foot {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--cool);
+}
+
+/* ---------- Ledger (signature element) ---------- */
+.bn-ledger {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  font-family: var(--font-mono), monospace;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+.bn-ledger-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+.bn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3a4150;
+}
+.bn-ledger-file {
+  margin-inline-start: 8px;
+  font-size: 12px;
+  color: var(--cool);
+}
+.bn-ledger-head,
+.bn-row {
+  display: grid;
+  grid-template-columns: 1.7fr 0.7fr 0.6fr 1fr;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px;
+}
+.bn-ledger-head {
+  color: var(--cool);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+}
+[dir="rtl"] .bn-ledger-head {
+  letter-spacing: normal;
+}
+.bn-row {
+  border-bottom: 1px solid rgba(124, 133, 151, 0.08);
+  color: var(--mist);
+  align-items: center;
+  transition: background 0.3s;
+}
+.bn-row:last-child {
+  border-bottom: none;
+}
+.bn-row-on {
+  background: rgba(47, 111, 224, 0.05);
+}
+.bn-cell-item {
+  color: #dfe3ea;
+}
+.bn-cell-cls {
+  color: var(--signal);
+  font-weight: 600;
+}
+.bn-row-on .bn-cell-rate {
+  color: #fff;
+}
+.bn-calc {
+  color: #5b6373;
+  font-style: normal;
+  animation: bnpulse 1s ease-in-out infinite;
+}
+@keyframes bnpulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .bn-hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .bn-left {
+    max-width: 100%;
+  }
+  .bn-inputrow {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bn-calc {
+    animation: none;
+  }
+}
