@@ -187,9 +187,9 @@ export default function Home() {
 
       {/* hero */}
       <section className="bn-hero">
-        <div className="bn-wrap bn-hero-grid">
+        <div className="bn-wrap bn-hero-grid" dir="ltr">
           <Ledger lang={lang} />
-          <div className="bn-hero-copy">
+          <div className="bn-hero-copy" dir={t.dir}>
             <span className="bn-eyebrow">{t.hero.eyebrow}</span>
             <h1 className="bn-h1">
               {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span>{t.hero.title[2]}
