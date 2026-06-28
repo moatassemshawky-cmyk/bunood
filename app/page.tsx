@@ -289,7 +289,7 @@ export default function Home() {
 
 /* ---- logo — matches brand sheet exactly ---------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const s = small ? 26 : 46;
+  const s = small ? 26 : 62;
   return (
     <span className="bn-logo" dir="ltr">
       <svg width={s} height={s} viewBox="0 0 96 96" fill="none" aria-hidden>
@@ -436,9 +436,10 @@ function GlobalStyle() {
 
 .bn-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);
   backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);}
+.bn-header .bn-wrap{max-width:none;margin:0;padding:0 48px;}
 .bn-header-in{display:flex;align-items:center;justify-content:space-between;height:66px;}
 .bn-logo{display:inline-flex;align-items:center;gap:10px;}
-.bn-word{font-family:var(--display);font-weight:600;font-size:28px;letter-spacing:-.01em;color:var(--graphite);}
+.bn-word{font-family:var(--display);font-weight:600;font-size:36px;letter-spacing:-.01em;color:var(--graphite);}
 .bn-nav-ctas{display:flex;align-items:center;gap:10px;margin-inline-start:auto;}
 .bn-nav{display:flex;align-items:center;gap:12px;}
 .bn-navlink{font-family:var(--display);font-weight:500;font-size:14.5px;color:var(--graphite);text-decoration:none;}
@@ -460,8 +461,8 @@ function GlobalStyle() {
 .bn-hero::before{content:'';position:absolute;inset:0;z-index:0;
   background-image:linear-gradient(125deg,rgba(20,23,28,.92),rgba(20,23,28,.56)),url('/hero-bg.jpg');
   background-size:cover;background-position:center;}
-.bn-hero .bn-wrap{position:relative;z-index:1;max-width:1320px;padding-left:0;}
-.bn-hero-grid{display:grid;grid-template-columns:0.88fr 1.08fr;gap:40px;align-items:center;}
+.bn-hero .bn-wrap{position:relative;z-index:1;max-width:none;margin-left:0;padding-left:0;padding-right:72px;}
+.bn-hero-grid{display:grid;grid-template-columns:480px 1fr;gap:60px;align-items:center;}
 .bn-hero-copy{animation:bn-rise .7s cubic-bezier(.2,.7,.2,1) both;}
 .bn-eyebrow{display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;
   color:var(--blue);background:var(--blue-soft);padding:6px 12px;border-radius:6px;margin-bottom:22px;}
