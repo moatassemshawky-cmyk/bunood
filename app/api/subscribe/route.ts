@@ -1,40 +1,66 @@
 import { NextResponse } from 'next/server';
 import { createNeonClient } from '../../../lib/neon';
 
-export async function POST(request: Request) {
-  const { email, whatsapp, role, lang } = await request.json();
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_ROLES = new Set(['engineer', 'contractor', 'supplier']);
+const ALLOWED_LANGS = new Set(['ar', 'en']);
 
-  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+export async function POST(request: Request) {
+  // Gracefully handle malformed JSON
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const { email, whatsapp, role, lang } = body;
+
+  // Validate email
+  if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
-  let client;
+  // Whitelist and sanitize optional fields
+  const safeEmail    = email.trim().toLowerCase();
+  const safeWhatsapp = typeof whatsapp === 'string' ? whatsapp.trim() || null : null;
+  const safeRole     = typeof role === 'string' && ALLOWED_ROLES.has(role) ? role : null;
+  const safeLang     = typeof lang === 'string' && ALLOWED_LANGS.has(lang) ? lang : null;
+
+  const client = createNeonClient();
   try {
-    client = createNeonClient();
     await client.connect();
 
+    // TODO: Move this to a one-time migration script. Running DDL on every
+    // request works but is wasteful once the table exists.
     await client.query(`
       CREATE TABLE IF NOT EXISTS early_access_signups (
-        id SERIAL PRIMARY KEY,
-        email TEXT UNIQUE NOT NULL,
-        whatsapp TEXT,
-        role TEXT,
-        lang TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
+        id          SERIAL PRIMARY KEY,
+        email       TEXT UNIQUE NOT NULL,
+        whatsapp    TEXT,
+        role        TEXT,
+        lang        TEXT,
+        created_at  TIMESTAMPTZ DEFAULT NOW()
       )
     `);
 
-    const result = await client.query(
-      'INSERT INTO early_access_signups (email, whatsapp, role, lang) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO UPDATE SET whatsapp = EXCLUDED.whatsapp, role = EXCLUDED.role, lang = EXCLUDED.lang RETURNING id, email, whatsapp, role, lang, created_at',
-      [email.trim(), typeof whatsapp === 'string' ? whatsapp.trim() : null, typeof role === 'string' ? role : null, typeof lang === 'string' ? lang : null],
+    await client.query(
+      `INSERT INTO early_access_signups (email, whatsapp, role, lang)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (email) DO UPDATE
+         SET whatsapp   = EXCLUDED.whatsapp,
+             role       = EXCLUDED.role,
+             lang       = EXCLUDED.lang`,
+      [safeEmail, safeWhatsapp, safeRole, safeLang],
     );
 
-    return NextResponse.json({ success: true, signup: result.rows[0] });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    // Log full error server-side; return a generic message to the client
+    // so we never leak connection strings, table schemas, or internal details.
+    console.error('[subscribe] DB error:', error);
+    return NextResponse.json({ error: 'Failed to save signup. Please try again.' }, { status: 500 });
   } finally {
-    if (client) {
-      await client.end();
-    }
+    await client.end().catch(() => {});
   }
 }

@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createNeonClient } from '../../../../lib/neon';
 
-export async function GET() {
+/** Validates Bearer token against ADMIN_SECRET env var. Fails closed if env is not set. */
+function isAuthorized(request: Request): boolean {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) return false;
+  return request.headers.get('Authorization') === `Bearer ${secret}`;
+}
+
+export async function GET(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const client = createNeonClient();
   try {
     await client.connect();
@@ -10,7 +21,8 @@ export async function GET() {
     );
     return NextResponse.json({ count: result.rows.length, signups: result.rows });
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    console.error('[admin/signups] DB error:', error);
+    return NextResponse.json({ error: 'Failed to fetch signups' }, { status: 500 });
   } finally {
     await client.end().catch(() => {});
   }

@@ -1,22 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import './page.css';
 
 /* ------------------------------------------------------------------ */
 /* bunood — home page (Arabic-first, RTL)                              */
 /* Procurement · Connect suppliers & contractors · AI estimation       */
-/* Drop into: app/page.tsx                                             */
 /* ------------------------------------------------------------------ */
 
 type Lang = 'ar' | 'en';
-type Role = 'engineer' | 'contractor' | 'supplier' | null;
+/** Non-nullable role identifier */
+type RoleId = 'engineer' | 'contractor' | 'supplier';
+/** Nullable role — null means "not yet chosen" */
+type Role = RoleId | null;
 
-const ROLE_LABEL: Record<Lang, Record<Exclude<Role, null>, string>> = {
+/* ---- Shared types -------------------------------------------------- */
+const ROLE_LABEL: Record<Lang, Record<RoleId, string>> = {
   ar: { engineer: 'مهندس', contractor: 'مقاول', supplier: 'مورّد' },
   en: { engineer: 'Engineer', contractor: 'Contractor', supplier: 'Supplier' },
 };
 
-/* ---- copy ---------------------------------------------------------- */
+/**
+ * Role items used in the signup modal. Kept as a typed constant rather than
+ * inline JSX so the data is reusable and the template is readable.
+ */
+const MODAL_ROLES: Array<{
+  id: RoleId;
+  ar: string;
+  en: string;
+  arSub: string;
+  enSub: string;
+}> = [
+  { id: 'engineer',   ar: 'مهندس / استشاري', en: 'Engineer / Consultant', arSub: 'سعّر المقايسات وصدّر التقارير.', enSub: 'Price BOQs and export reports.' },
+  { id: 'contractor', ar: 'مقاول',            en: 'Contractor',           arSub: 'من المقايسة للتوريد أسرع.',    enSub: 'From BOQ to procurement, faster.' },
+  { id: 'supplier',   ar: 'مورّد',            en: 'Supplier',             arSub: 'استقبل الطلبات وابعت عروضك.', enSub: 'Receive RFQs and send your quotes.' },
+];
+
+/* ---- i18n copy ----------------------------------------------------- */
 const COPY = {
   ar: {
     dir: 'rtl' as const,
@@ -47,9 +67,9 @@ const COPY = {
       title: 'بنود بيشتغل معاك إنت بالذات.',
       sub: 'كل دور ليه مساره الخاص. اختر اللي يوصّفك، وكمّل تسجيل.',
       items: [
-        { id: 'engineer' as const, t: 'مهندس / استشاري', d: 'سعّر المقايسات، راجع كل بند بدقة، وصدّر تقرير جاهز.' },
-        { id: 'contractor' as const, t: 'مقاول', d: 'من المقايسة للتوريد — سعّر، قارن، وقدّم عروضك أسرع.' },
-        { id: 'supplier' as const, t: 'مورّد', d: 'استقبل طلبات التوريد وابعت عروض أسعارك للمقاولين.' },
+        { id: 'engineer' as const,   t: 'مهندس / استشاري', d: 'سعّر المقايسات، راجع كل بند بدقة، وصدّر تقرير جاهز.' },
+        { id: 'contractor' as const, t: 'مقاول',            d: 'من المقايسة للتوريد — سعّر، قارن، وقدّم عروضك أسرع.' },
+        { id: 'supplier' as const,   t: 'مورّد',            d: 'استقبل طلبات التوريد وابعت عروض أسعارك للمقاولين.' },
       ],
       cta: 'ابدأ كـ',
     },
@@ -61,6 +81,11 @@ const COPY = {
         { t: 'تسعير عارف القاهرة', d: 'الأسعار بتفرق من شارع لشارع، مش بس من محافظة لمحافظة. بنود بيتابع التفصيلة دي.' },
         { t: 'توريد من غير وجع دماغ', d: 'طلبات التوريد بتتبعت بواتساب وإيميل، والعروض بترجعلك مرتّبة وجاهزة للمقارنة.' },
       ],
+    },
+    modal: {
+      eyebrow: 'إنشاء حساب',
+      title: 'انت مين في المشروع؟',
+      sub: 'اختر دورك وهنخصّص تجربتك من اللحظة الأولى.',
     },
     cta: {
       title: 'كن أول من يربط ويسعّر ويورّد مع بنود.',
@@ -107,9 +132,9 @@ const COPY = {
       title: 'Bunood works the way you do.',
       sub: 'Each role has its own flow. Pick the one that fits and continue.',
       items: [
-        { id: 'engineer' as const, t: 'Engineer / Consultant', d: 'Price BOQs, review every line precisely, export a ready report.' },
-        { id: 'contractor' as const, t: 'Contractor', d: 'From BOQ to procurement — price, compare, and bid faster.' },
-        { id: 'supplier' as const, t: 'Supplier', d: 'Receive RFQs and send your quotes back to contractors.' },
+        { id: 'engineer' as const,   t: 'Engineer / Consultant', d: 'Price BOQs, review every line precisely, export a ready report.' },
+        { id: 'contractor' as const, t: 'Contractor',            d: 'From BOQ to procurement — price, compare, and bid faster.' },
+        { id: 'supplier' as const,   t: 'Supplier',              d: 'Receive RFQs and send your quotes back to contractors.' },
       ],
       cta: 'Start as',
     },
@@ -121,6 +146,11 @@ const COPY = {
         { t: 'Pricing that knows Cairo', d: 'Rates shift street to street, not just by governorate. Bunood tracks that granularity.' },
         { t: 'Procurement without the headache', d: 'RFQs go out by WhatsApp and email; quotes come back sorted and ready to compare.' },
       ],
+    },
+    modal: {
+      eyebrow: 'Create account',
+      title: 'What is your role?',
+      sub: "Pick your role and we'll tailor the experience from day one.",
     },
     cta: {
       title: 'Be first to connect, price, and procure with Bunood.',
@@ -140,16 +170,18 @@ const COPY = {
   },
 } as const;
 
-/* ---- demo ledger data --------------------------------------------- */
-type Row = { code: string; ar: string; en: string; unit: string; qty: number; rate: number };
-const ROWS: Row[] = [
-  { code: 'B07', ar: 'خرسانة مسلّحة — أعمدة', en: 'Reinforced concrete, columns', unit: 'm³', qty: 64, rate: 4850 },
-  { code: 'B12', ar: 'مباني طوب، 20 سم', en: 'Brick blockwork, 20 cm', unit: 'm²', qty: 320, rate: 285 },
-  { code: 'B19', ar: 'بياض محارة داخلي', en: 'Internal cement plaster', unit: 'm²', qty: 540, rate: 110 },
-  { code: 'B23', ar: 'بلاط سيراميك أرضيات', en: 'Ceramic floor tiles', unit: 'm²', qty: 410, rate: 240 },
-  { code: 'B41', ar: 'أسلاك نحاس، 3×2.5 مم²', en: 'Cu wiring, 3×2.5 mm²', unit: 'm.l', qty: 1200, rate: 64 },
+/* ---- Demo ledger data ---------------------------------------------- */
+type LedgerRow = { code: string; ar: string; en: string; unit: string; qty: number; rate: number };
+
+const LEDGER_ROWS: LedgerRow[] = [
+  { code: 'B07', ar: 'خرسانة مسلّحة — أعمدة', en: 'Reinforced concrete, columns', unit: 'm³',  qty: 64,   rate: 4850 },
+  { code: 'B12', ar: 'مباني طوب، 20 سم',       en: 'Brick blockwork, 20 cm',      unit: 'm²',  qty: 320,  rate: 285  },
+  { code: 'B19', ar: 'بياض محارة داخلي',        en: 'Internal cement plaster',     unit: 'm²',  qty: 540,  rate: 110  },
+  { code: 'B23', ar: 'بلاط سيراميك أرضيات',    en: 'Ceramic floor tiles',         unit: 'm²',  qty: 410,  rate: 240  },
+  { code: 'B41', ar: 'أسلاك نحاس، 3×2.5 مم²',  en: 'Cu wiring, 3×2.5 mm²',       unit: 'm.l', qty: 1200, rate: 64   },
 ];
-const fmt = (n: number) => n.toLocaleString('en-US');
+
+const formatNumber = (n: number) => n.toLocaleString('en-US');
 
 /* ================================================================== */
 
@@ -159,34 +191,55 @@ export default function Home() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const t = COPY[lang];
 
-  const pickRole = (r: Exclude<Role, null>) => {
+  /** Select a role and smoothly scroll to the waitlist form. */
+  const pickRole = (r: RoleId) => {
     setRole(r);
-    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.getElementById('waitlist')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('waitlist')?.scrollIntoView({
+      behavior: prefersReduced ? 'auto' : 'smooth',
+    });
   };
 
-  const openModal = () => setShowRoleModal(true);
+  const openModal  = () => setShowRoleModal(true);
   const closeModal = () => setShowRoleModal(false);
+
+  /** Close the modal when the user presses Escape. */
+  useEffect(() => {
+    if (!showRoleModal) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeModal(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showRoleModal]);
 
   return (
     <div className="bn-root" dir={t.dir} lang={lang}>
-      <GlobalStyle />
 
-      {/* role selection modal */}
+      {/* ---- Role selection modal ------------------------------------ */}
       {showRoleModal && (
-        <div className="bn-modal-backdrop" onClick={closeModal} dir={t.dir}>
-          <div className="bn-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div
+          className="bn-modal-backdrop"
+          onClick={closeModal}
+          dir={t.dir}
+          aria-label="Dismiss modal"
+        >
+          <div
+            className="bn-modal"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
             <button className="bn-modal-close" onClick={closeModal} aria-label="Close">✕</button>
-            <p className="bn-modal-eyebrow">{lang === 'ar' ? 'إنشاء حساب' : 'Create account'}</p>
-            <h2 className="bn-modal-title">{lang === 'ar' ? 'انت مين في المشروع؟' : 'What is your role?'}</h2>
-            <p className="bn-modal-sub">{lang === 'ar' ? 'اختر دورك وهنخصّص تجربتك من اللحظة الأولى.' : "Pick your role and we'll tailor the experience from day one."}</p>
+            <p className="bn-modal-eyebrow">{t.modal.eyebrow}</p>
+            <h2 id="modal-title" className="bn-modal-title">{t.modal.title}</h2>
+            <p className="bn-modal-sub">{t.modal.sub}</p>
             <div className="bn-modal-roles">
-              {([
-                { id: 'engineer' as const,   ar: 'مهندس / استشاري',  en: 'Engineer / Consultant', arSub: 'سعّر المقايسات وصدّر التقارير.', enSub: 'Price BOQs and export reports.' },
-                { id: 'contractor' as const, ar: 'مقاول',             en: 'Contractor',            arSub: 'من المقايسة للتوريد أسرع.', enSub: 'From BOQ to procurement, faster.' },
-                { id: 'supplier' as const,   ar: 'مورّد',             en: 'Supplier',              arSub: 'استقبل الطلبات وابعت عروضك.', enSub: 'Receive RFQs and send your quotes.' },
-              ]).map(item => (
-                <button key={item.id} className="bn-role-card" onClick={() => { pickRole(item.id); closeModal(); }}>
+              {MODAL_ROLES.map(item => (
+                <button
+                  key={item.id}
+                  className="bn-role-card"
+                  onClick={() => { pickRole(item.id); closeModal(); }}
+                >
                   <span className="bn-role-card-icon"><RoleIcon id={item.id} /></span>
                   <span className="bn-role-card-label">{lang === 'ar' ? item.ar : item.en}</span>
                   <span className="bn-role-card-sub">{lang === 'ar' ? item.arSub : item.enSub}</span>
@@ -197,7 +250,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* header */}
+      {/* ---- Header ------------------------------------------------- */}
       <header className="bn-header">
         <div className="bn-wrap bn-header-in">
           <Logo />
@@ -205,22 +258,26 @@ export default function Home() {
             <button onClick={openModal} className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</button>
             <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </div>
-          <nav className="bn-nav">
+          <nav className="bn-nav" aria-label="Main navigation">
             <a href="#how" className="bn-navlink">{t.nav.whatWeDo}</a>
-            <button className="bn-lang" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label="Switch language">
+            <button
+              className="bn-lang"
+              onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+              aria-label="Switch language"
+            >
               {lang === 'ar' ? 'EN' : 'العربية'}
             </button>
           </nav>
         </div>
       </header>
 
-      {/* hero */}
-      <section className="bn-hero">
+      {/* ---- Hero --------------------------------------------------- */}
+      <section className="bn-hero" aria-labelledby="hero-heading">
         <div className="bn-wrap bn-hero-grid" dir="ltr">
           <Ledger lang={lang} />
           <div className="bn-hero-copy" dir={t.dir}>
             <span className="bn-eyebrow">{t.hero.eyebrow}</span>
-            <h1 className="bn-h1">
+            <h1 id="hero-heading" className="bn-h1">
               {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span>{t.hero.title[2]}
             </h1>
             <p className="bn-lede">{t.hero.sub}</p>
@@ -232,22 +289,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* selling strip */}
-      <div className="bn-strip">
+      {/* ---- Selling strip ------------------------------------------ */}
+      <div className="bn-strip" aria-hidden>
         <div className="bn-wrap bn-strip-in">
-          {t.strip.map((s, i) => (
-            <span className="bn-strip-item" key={i}>{s}</span>
+          {t.strip.map(s => (
+            <span className="bn-strip-item" key={s}>{s}</span>
           ))}
         </div>
       </div>
 
-      {/* how it works */}
-      <section className="bn-section" id="how">
+      {/* ---- How it works ------------------------------------------- */}
+      <section className="bn-section" id="how" aria-labelledby="how-heading">
         <div className="bn-wrap">
-          <span className="bn-label">{t.how.label}</span>
+          <span className="bn-label" id="how-heading">{t.how.label}</span>
           <div className="bn-steps">
             {t.how.steps.map((s, i) => (
-              <div className="bn-step" key={i}>
+              <div className="bn-step" key={s.t}>
                 <span className="bn-step-num">{String(i + 1).padStart(2, '0')}</span>
                 <h3 className="bn-step-t">{s.t}</h3>
                 <p className="bn-step-d">{s.d}</p>
@@ -257,18 +314,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* roles */}
-      <section className="bn-section bn-section-alt" id="roles">
+      {/* ---- Roles -------------------------------------------------- */}
+      <section className="bn-section bn-section-alt" id="roles" aria-labelledby="roles-heading">
         <div className="bn-wrap">
-          <span className="bn-label">{t.roles.label}</span>
+          <span className="bn-label" id="roles-heading">{t.roles.label}</span>
           <h2 className="bn-h2">{t.roles.title}</h2>
           <p className="bn-lede bn-roles-sub">{t.roles.sub}</p>
           <div className="bn-roles">
-            {t.roles.items.map((r) => (
+            {t.roles.items.map(r => (
               <button
                 key={r.id}
                 className={`bn-role ${role === r.id ? 'is-on' : ''}`}
                 onClick={() => pickRole(r.id)}
+                aria-pressed={role === r.id}
               >
                 <RoleIcon id={r.id} />
                 <h3 className="bn-role-t">{r.t}</h3>
@@ -280,13 +338,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* features */}
-      <section className="bn-section">
+      {/* ---- Features ----------------------------------------------- */}
+      <section className="bn-section" aria-labelledby="feat-heading">
         <div className="bn-wrap">
-          <span className="bn-label">{t.feat.label}</span>
+          <span className="bn-label" id="feat-heading">{t.feat.label}</span>
           <div className="bn-feats">
-            {t.feat.items.map((f, i) => (
-              <div className="bn-feat" key={i}>
+            {t.feat.items.map(f => (
+              <div className="bn-feat" key={f.t}>
                 <h3 className="bn-feat-t">{f.t}</h3>
                 <p className="bn-feat-d">{f.d}</p>
               </div>
@@ -295,16 +353,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* waitlist */}
-      <section className="bn-section bn-cta" id="waitlist">
+      {/* ---- Waitlist ----------------------------------------------- */}
+      <section className="bn-section bn-cta" id="waitlist" aria-labelledby="cta-heading">
         <div className="bn-wrap bn-cta-in">
-          <h2 className="bn-h2">{t.cta.title}</h2>
+          <h2 id="cta-heading" className="bn-h2">{t.cta.title}</h2>
           <p className="bn-lede bn-cta-sub">{t.cta.sub}</p>
           <WaitlistForm lang={lang} role={role} />
         </div>
       </section>
 
-      {/* footer */}
+      {/* ---- Footer ------------------------------------------------- */}
       <footer className="bn-footer">
         <div className="bn-wrap bn-footer-in">
           <Logo small />
@@ -316,12 +374,12 @@ export default function Home() {
   );
 }
 
-/* ---- logo — matches brand sheet exactly ---------------------------- */
+/* ---- Logo ---------------------------------------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const s = small ? 26 : 62;
+  const size = small ? 26 : 62;
   return (
     <span className="bn-logo" dir="ltr">
-      <svg width={s} height={s} viewBox="0 0 96 96" fill="none" aria-hidden>
+      <svg width={size} height={size} viewBox="0 0 96 96" fill="none" aria-hidden>
         <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
           <path d="M20 38 V23 Q20 20 23 20 H38" fill="none" />
           <path d="M76 58 V73 Q76 76 73 76 H58" fill="none" />
@@ -337,36 +395,49 @@ function Logo({ small }: { small?: boolean }) {
   );
 }
 
-/* ---- role icons ---------------------------------------------------- */
-function RoleIcon({ id }: { id: Exclude<Role, null> }) {
-  const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+/* ---- Role icons ---------------------------------------------------- */
+function RoleIcon({ id }: { id: RoleId }) {
+  const p = {
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" className="bn-role-ic" aria-hidden>
-      {id === 'engineer' && (<><path {...p} d="M5 19 L19 19 L5 5 Z" /><path {...p} d="M5 12 L12 12" /></>)}
+      {id === 'engineer'   && (<><path {...p} d="M5 19 L19 19 L5 5 Z" /><path {...p} d="M5 12 L12 12" /></>)}
       {id === 'contractor' && (<><path {...p} d="M3 18 H21" /><path {...p} d="M5 18 a7 7 0 0 1 14 0" /><path {...p} d="M11 5 h2 v3" /></>)}
-      {id === 'supplier' && (<><path {...p} d="M4 8 L12 4 L20 8 V16 L12 20 L4 16 Z" /><path {...p} d="M4 8 L12 12 L20 8" /><path {...p} d="M12 12 V20" /></>)}
+      {id === 'supplier'   && (<><path {...p} d="M4 8 L12 4 L20 8 V16 L12 20 L4 16 Z" /><path {...p} d="M4 8 L12 12 L20 8" /><path {...p} d="M12 12 V20" /></>)}
     </svg>
   );
 }
 
-/* ---- animated ledger ---------------------------------------------- */
+/* ---- Animated ledger ----------------------------------------------- */
 function Ledger({ lang }: { lang: Lang }) {
-  const N = ROWS.length;
+  const N = LEDGER_ROWS.length;
   const [step, setStep] = useState(0);
+
   const head = lang === 'ar'
     ? { code: 'كود', item: 'البند', qty: 'كمية', rate: 'سعر', amount: 'إجمالي', total: 'إجمالي التقدير', file: 'مقايسة-المشروع.xlsx' }
     : { code: 'Code', item: 'Item', qty: 'Qty', rate: 'Rate', amount: 'Amount', total: 'Total estimate', file: 'project-boq.xlsx' };
 
   useEffect(() => {
-    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setStep(2 * N); return; }
-    const id = setInterval(() => setStep((s) => (s >= 2 * N + 6 ? 0 : s + 1)), 560);
+    // useEffect is client-only; no need for typeof window guard.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      setStep(2 * N);
+      return;
+    }
+    const id = setInterval(() => setStep(s => (s >= 2 * N + 6 ? 0 : s + 1)), 560);
     return () => clearInterval(id);
-  }, [N]);
+  // N is LEDGER_ROWS.length — a module-level constant that never changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const classified = Math.min(step, N);
-  const priced = Math.min(Math.max(step - N, 0), N);
-  const total = ROWS.slice(0, priced).reduce((a, r) => a + r.qty * r.rate, 0);
+  const priced     = Math.min(Math.max(step - N, 0), N);
+  const total      = LEDGER_ROWS.slice(0, priced).reduce((a, r) => a + r.qty * r.rate, 0);
 
   return (
     <div className="bn-ledger" dir="ltr" aria-hidden>
@@ -375,39 +446,51 @@ function Ledger({ lang }: { lang: Lang }) {
         <span className="bn-ledger-name">{head.file}</span>
       </div>
       <div className="bn-ledger-head">
-        <span>{head.code}</span><span className="bn-l-desc">{head.item}</span>
-        <span className="bn-l-num">{head.qty}</span><span className="bn-l-num">{head.rate}</span><span className="bn-l-num">{head.amount}</span>
+        <span>{head.code}</span>
+        <span className="bn-l-desc">{head.item}</span>
+        <span className="bn-l-num">{head.qty}</span>
+        <span className="bn-l-num">{head.rate}</span>
+        <span className="bn-l-num">{head.amount}</span>
       </div>
-      {ROWS.map((r, i) => {
-        const isC = i < classified, isP = i < priced;
+      {LEDGER_ROWS.map((r, i) => {
+        const isC = i < classified;
+        const isP = i < priced;
         return (
-          <div className={`bn-row ${isC ? 'is-c' : ''} ${isP ? 'is-p' : ''}`} key={r.code}>
+          <div className={`bn-row${isC ? ' is-c' : ''}${isP ? ' is-p' : ''}`} key={r.code}>
             <span className="bn-code">{isC ? r.code : <span className="bn-pending">—</span>}</span>
             <span className="bn-l-desc">{lang === 'ar' ? r.ar : r.en}</span>
             <span className="bn-l-num">{r.qty} {r.unit}</span>
-            <span className="bn-l-num">{isP ? fmt(r.rate) : <span className="bn-pending">—</span>}</span>
-            <span className="bn-l-num bn-amt">{isP ? fmt(r.qty * r.rate) : <span className="bn-pending">—</span>}</span>
+            <span className="bn-l-num">{isP ? formatNumber(r.rate) : <span className="bn-pending">—</span>}</span>
+            <span className="bn-l-num bn-amt">{isP ? formatNumber(r.qty * r.rate) : <span className="bn-pending">—</span>}</span>
           </div>
         );
       })}
       <div className="bn-ledger-total">
         <span>{head.total}</span>
-        <span className="bn-total-val">EGP {fmt(total)}</span>
+        <span className="bn-total-val">EGP {formatNumber(total)}</span>
       </div>
     </div>
   );
 }
 
-/* ---- waitlist form ------------------------------------------------- */
+/* ---- Waitlist form ------------------------------------------------- */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FormStatus = 'idle' | 'loading' | 'ok' | 'err';
+
 function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
   const c = COPY[lang].form;
-  const [email, setEmail] = useState('');
-  const [wa, setWa] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'err'>('idle');
-  const [msg, setMsg] = useState('');
+  const [email, setEmail]   = useState('');
+  const [wa, setWa]         = useState('');
+  const [status, setStatus] = useState<FormStatus>('idle');
+  const [msg, setMsg]       = useState('');
 
   const submit = async () => {
-    if (!/^[^\s@]+@[^^\s@]+\.[^\s@]+$/.test(email)) { setStatus('err'); setMsg(c.errBad); return; }
+    if (!EMAIL_RE.test(email)) {
+      setStatus('err');
+      setMsg(c.errBad);
+      return;
+    }
     setStatus('loading');
     try {
       const res = await fetch('/api/subscribe', {
@@ -417,227 +500,51 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error || c.errFail);
+        throw new Error(body?.error ?? c.errFail);
       }
-      setStatus('ok'); setMsg(c.success); setEmail(''); setWa('');
+      setStatus('ok');
+      setMsg(c.success);
+      setEmail('');
+      setWa('');
     } catch (error) {
       setStatus('err');
       setMsg(error instanceof Error ? error.message : c.errFail);
     }
   };
 
-  if (status === 'ok') return <p className="bn-form-ok">✓ {msg}</p>;
+  if (status === 'ok') {
+    return <p className="bn-form-ok">✓ {msg}</p>;
+  }
 
   return (
     <div className="bn-form">
       {role && <span className="bn-role-tag">{c.asTag} {ROLE_LABEL[lang][role]}</span>}
       <div className="bn-form-fields">
-        <input className="bn-input" type="email" inputMode="email" placeholder={c.email}
-          value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />
-        <input className="bn-input" type="tel" inputMode="tel" placeholder={c.whatsapp}
-          value={wa} onChange={(e) => setWa(e.target.value)} dir="ltr" />
+        <input
+          className="bn-input"
+          type="email"
+          inputMode="email"
+          placeholder={c.email}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && submit()}
+          disabled={status === 'loading'}
+        />
+        <input
+          className="bn-input"
+          type="tel"
+          inputMode="tel"
+          placeholder={c.whatsapp}
+          value={wa}
+          onChange={e => setWa(e.target.value)}
+          dir="ltr"
+          disabled={status === 'loading'}
+        />
         <button className="bn-btn" onClick={submit} disabled={status === 'loading'}>
           {status === 'loading' ? c.sending : c.cta}
         </button>
       </div>
-      {status === 'err' && <p className="bn-form-err">{msg}</p>}
+      {status === 'err' && <p className="bn-form-err" role="alert">{msg}</p>}
     </div>
-  );
-}
-
-/* ---- styles -------------------------------------------------------- */
-function GlobalStyle() {
-  return (
-    <style dangerouslySetInnerHTML={{ __html: `
-@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-.bn-root{
-  --blue:#2F6FE0;--graphite:#2C313A;--grey:#9AA3AE;--mist:#F3F5F7;
-  --line:#E4E8ED;--blue-soft:rgba(47,111,224,.07);
-  --display:'Readex Pro',system-ui,sans-serif;
-  --body:'IBM Plex Sans Arabic','Readex Pro',system-ui,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,monospace;
-  color:var(--graphite);background:#fff;font-family:var(--body);line-height:1.65;-webkit-font-smoothing:antialiased;
-}
-.bn-root *{box-sizing:border-box;}
-.bn-wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
-.bn-accent{color:var(--blue);}
-
-.bn-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);
-  backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);}
-.bn-header .bn-wrap{max-width:none;margin:0;padding:0 48px;}
-.bn-header-in{display:flex;align-items:center;justify-content:space-between;height:66px;}
-.bn-logo{display:inline-flex;align-items:center;gap:10px;}
-.bn-word{font-family:var(--display);font-weight:600;font-size:36px;letter-spacing:-.01em;color:var(--graphite);}
-.bn-nav-ctas{display:flex;align-items:center;gap:10px;margin-inline-start:auto;}
-.bn-nav{display:flex;align-items:center;gap:12px;}
-.bn-navlink{font-family:var(--display);font-weight:500;font-size:14.5px;color:var(--graphite);text-decoration:none;}
-.bn-navlink:hover{color:var(--blue);}
-.bn-lang{background:none;border:none;cursor:pointer;font-family:var(--display);font-weight:500;font-size:14px;color:var(--graphite);padding:6px;}
-.bn-lang:hover{color:var(--blue);}
-
-.bn-btn{font-family:var(--display);font-weight:600;font-size:15px;color:#fff;background:var(--blue);
-  border:none;border-radius:10px;padding:13px 24px;cursor:pointer;text-decoration:none;display:inline-block;
-  transition:transform .12s ease,background .15s ease;white-space:nowrap;}
-.bn-btn:hover{background:#2660cf;transform:translateY(-1px);}
-.bn-btn:active{transform:translateY(0);}
-.bn-btn:disabled{opacity:.6;cursor:default;transform:none;}
-.bn-btn-sm{padding:9px 17px;font-size:14px;border-radius:9px;}
-.bn-btn-ghost{background:transparent;color:var(--blue);border:1.5px solid var(--line);}
-.bn-btn-ghost:hover{background:var(--blue-soft);border-color:var(--blue);}
-
-.bn-hero{position:relative;padding:84px 0 72px;background:#2C313A;overflow:hidden;}
-.bn-hero::before{content:'';position:absolute;inset:0;z-index:0;
-  background-image:linear-gradient(125deg,rgba(20,23,28,.92),rgba(20,23,28,.56)),url('/hero-bg.jpg');
-  background-size:cover;background-position:center;}
-.bn-hero .bn-wrap{position:relative;z-index:1;max-width:none;margin-left:0;padding-left:0;padding-right:72px;}
-.bn-hero-grid{display:grid;grid-template-columns:480px 1fr;gap:60px;align-items:center;}
-.bn-hero-copy{animation:bn-rise .7s cubic-bezier(.2,.7,.2,1) both;}
-.bn-eyebrow{display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;
-  color:var(--blue);background:var(--blue-soft);padding:6px 12px;border-radius:6px;margin-bottom:22px;}
-.bn-h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.5vw,52px);line-height:1.18;
-  letter-spacing:-.01em;margin:0 0 20px;color:#fff;}
-.bn-lede{font-size:18px;color:#4a525e;max-width:33em;margin:0 0 28px;}
-.bn-hero .bn-lede{color:#d6dbe1;}
-.bn-hero .bn-eyebrow{background:rgba(47,111,224,.22);color:#bcd2f7;}
-.bn-hero-cta{display:flex;gap:12px;flex-wrap:wrap;}
-.bn-hero .bn-btn-ghost{border-color:rgba(255,255,255,.32);color:#fff;background:transparent;}
-.bn-hero .bn-btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.6);}
-
-.bn-strip{background:var(--graphite);}
-.bn-strip-in{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:center;padding:18px 24px;}
-.bn-strip-item{font-family:var(--display);font-weight:500;font-size:15px;color:#e7eaee;position:relative;}
-.bn-strip-item::before{content:'';display:inline-block;width:7px;height:7px;border-radius:2px;
-  background:var(--blue);margin-inline-end:10px;vertical-align:middle;}
-
-.bn-section{padding:84px 0;}
-.bn-section-alt{background:var(--mist);}
-.bn-label{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;
-  color:var(--grey);margin-bottom:18px;}
-.bn-h2{font-family:var(--display);font-weight:700;font-size:clamp(26px,3.3vw,38px);letter-spacing:-.01em;margin:0 0 14px;}
-
-.bn-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:18px;}
-.bn-step-num{font-family:var(--mono);font-size:14px;color:var(--blue);font-weight:600;display:block;
-  width:38px;border-top:2px solid var(--blue);padding-top:14px;margin-bottom:12px;}
-.bn-step-t{font-family:var(--display);font-weight:600;font-size:18.5px;margin:0 0 8px;}
-.bn-step-d{font-size:15px;color:#5a626e;margin:0;}
-
-.bn-roles-sub{margin-bottom:30px;}
-.bn-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.bn-role{text-align:inherit;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:28px;
-  cursor:pointer;font-family:var(--body);color:var(--graphite);
-  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;}
-.bn-role:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 16px 40px -22px rgba(47,111,224,.5);}
-.bn-role.is-on{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft);}
-.bn-role-ic{color:var(--blue);margin-bottom:14px;display:block;}
-.bn-role-t{font-family:var(--display);font-weight:600;font-size:20px;margin:0 0 8px;}
-.bn-role-d{font-size:15px;color:#5a626e;margin:0 0 16px;}
-.bn-role-cta{font-family:var(--display);font-weight:600;font-size:14.5px;color:var(--blue);}
-
-.bn-feats{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px;}
-.bn-feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;
-  transition:transform .15s ease,box-shadow .15s ease;}
-.bn-feat:hover{transform:translateY(-2px);box-shadow:0 14px 36px -22px rgba(44,49,58,.4);}
-.bn-feat-t{font-family:var(--display);font-weight:600;font-size:19px;margin:0 0 9px;}
-.bn-feat-t::before{content:'';display:inline-block;width:8px;height:8px;border-radius:2px;
-  background:var(--blue);margin-inline-end:9px;vertical-align:middle;}
-.bn-feat-d{font-size:15px;color:#5a626e;margin:0;}
-
-.bn-ledger{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
-  box-shadow:0 18px 50px -24px rgba(44,49,58,.35);font-family:var(--mono);
-  animation:bn-rise .8s cubic-bezier(.2,.7,.2,1) .08s both;}
-.bn-ledger-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:var(--mist);border-bottom:1px solid var(--line);}
-.bn-dot{width:9px;height:9px;border-radius:50%;background:#d4d9df;}
-.bn-ledger-name{margin-left:8px;font-size:12px;color:var(--grey);}
-.bn-ledger-head,.bn-row,.bn-ledger-total{display:grid;grid-template-columns:46px 1fr 60px 70px 92px;gap:10px;align-items:center;padding:0 18px;}
-.bn-ledger-head{height:42px;font-size:11px;letter-spacing:.02em;font-weight:500;color:#6b7480;background:#fafbfc;border-bottom:1px solid var(--line);}
-.bn-ledger-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bn-row{height:46px;font-size:12.5px;border-bottom:1px solid #f0f2f5;transition:background .3s ease;}
-.bn-row.is-c{background:var(--blue-soft);}
-.bn-row.is-p{background:#fff;}
-.bn-l-desc{font-family:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--graphite);}
-.bn-l-num{text-align:right;color:#5a626e;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.bn-pending{color:#c4ccd4;}
-.bn-code{font-weight:600;color:var(--grey);font-size:12px;}
-.bn-row.is-c .bn-code{color:#fff;background:var(--blue);border-radius:5px;padding:3px 6px;justify-self:start;font-size:11px;animation:bn-pop .35s ease both;}
-.bn-amt{color:var(--graphite);font-weight:500;}
-.bn-row.is-p .bn-amt{color:var(--blue);}
-.bn-ledger-total{height:54px;background:var(--graphite);color:#fff;font-family:var(--display);}
-.bn-ledger-total>span:first-child{grid-column:1 / 4;font-size:13px;color:#c7ccd3;}
-.bn-total-val{grid-column:4 / 6;text-align:right;font-family:var(--mono);font-weight:600;font-size:16px;color:#fff;font-variant-numeric:tabular-nums;}
-
-.bn-cta{background:var(--graphite);color:#fff;text-align:center;}
-.bn-cta-in{max-width:640px;}
-.bn-cta .bn-h2{color:#fff;}
-.bn-cta-sub{color:#c7ccd3;margin-inline:auto;}
-.bn-form{margin-top:28px;}
-.bn-role-tag{display:inline-block;font-family:var(--mono);font-size:12.5px;color:var(--blue);
-  background:rgba(47,111,224,.16);padding:6px 12px;border-radius:6px;margin-bottom:14px;}
-.bn-form-fields{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:580px;margin-inline:auto;}
-.bn-input{flex:1 1 200px;min-width:0;font-family:var(--body);font-size:15px;padding:13px 15px;border:1px solid #454c57;
-  border-radius:10px;background:#373d47;color:#fff;transition:border-color .15s ease,box-shadow .15s ease;}
-.bn-input::placeholder{color:#8b93a0;}
-.bn-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,224,.25);}
-.bn-form-err{color:#ff9b8a;font-size:14px;margin:10px 2px 0;}
-.bn-form-ok{font-family:var(--display);font-weight:500;font-size:16px;color:#fff;
-  background:rgba(47,111,224,.2);padding:14px 18px;border-radius:10px;display:inline-block;margin-top:28px;}
-
-.bn-footer{border-top:1px solid var(--line);padding:30px 0;}
-.bn-footer-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-.bn-foot-tag{font-size:14px;color:#5a626e;}
-.bn-foot-rights{font-family:var(--mono);font-size:12px;color:var(--grey);margin-inline-start:auto;}
-
-/* modal */
-.bn-modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(20,23,28,.72);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;padding:24px;
-  animation:bn-fade-in .2s ease both;}
-.bn-modal{background:#fff;border-radius:20px;padding:40px 36px 36px;max-width:600px;width:100%;
-  position:relative;animation:bn-modal-in .25s cubic-bezier(.2,.7,.2,1) both;
-  box-shadow:0 32px 80px -20px rgba(0,0,0,.45);}
-.bn-modal-close{position:absolute;top:16px;inset-inline-end:16px;background:var(--mist);
-  border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:14px;
-  color:var(--grey);display:flex;align-items:center;justify-content:center;transition:background .15s;}
-.bn-modal-close:hover{background:var(--line);}
-.bn-modal-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--blue);
-  text-transform:uppercase;margin:0 0 10px;}
-.bn-modal-title{font-family:var(--display);font-weight:700;font-size:26px;margin:0 0 8px;color:var(--graphite);}
-.bn-modal-sub{font-size:15px;color:#5a626e;margin:0 0 28px;}
-.bn-modal-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.bn-role-card{background:#fafbfc;border:1.5px solid var(--line);border-radius:14px;
-  padding:22px 16px 20px;cursor:pointer;text-align:center;display:flex;flex-direction:column;
-  align-items:center;gap:10px;transition:border-color .15s,box-shadow .15s,transform .15s;
-  font-family:inherit;}
-.bn-role-card:hover{border-color:var(--blue);box-shadow:0 6px 24px -8px rgba(47,111,224,.22);transform:translateY(-2px);}
-.bn-role-card-icon{width:52px;height:52px;border-radius:12px;background:var(--blue-soft);
-  display:flex;align-items:center;justify-content:center;color:var(--blue);}
-.bn-role-card-icon .bn-role-ic{width:26px;height:26px;}
-.bn-role-card-label{font-family:var(--display);font-weight:600;font-size:15px;color:var(--graphite);}
-.bn-role-card-sub{font-size:13px;color:#6b7480;line-height:1.5;}
-@keyframes bn-fade-in{from{opacity:0;}to{opacity:1;}}
-@keyframes bn-modal-in{from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:none;}}
-
-@keyframes bn-rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
-@keyframes bn-pop{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
-@media (prefers-reduced-motion:reduce){
-  .bn-hero-copy,.bn-ledger{animation:none;}
-  .bn-btn,.bn-feat,.bn-role{transition:none;}
-}
-@media (max-width:900px){
-  .bn-hero-grid{grid-template-columns:1fr;gap:40px;}
-  .bn-steps{grid-template-columns:repeat(2,1fr);gap:26px;}
-  .bn-roles{grid-template-columns:1fr;}
-  .bn-feats{grid-template-columns:1fr;}
-  .bn-hero{padding:48px 0 52px;}
-  .bn-section{padding:60px 0;}
-}
-@media (max-width:520px){
-  .bn-steps{grid-template-columns:1fr;}
-  .bn-nav{gap:8px;}
-  .bn-navlink{display:none;}
-  .bn-modal-roles{grid-template-columns:1fr;}
-  .bn-modal{padding:32px 20px 28px;}
-}
-`}} />
   );
 }
