@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 
 /* ------------------------------------------------------------------ */
-/*  bunood — home page (Arabic-first, RTL)                             */
-/*  Instant BOQ + procurement · تسعير وتوريد فوري                      */
-/*  Drop into: app/page.tsx                                           */
+/* bunood — home page (Arabic-first, RTL)                              */
+/* Procurement · Connect suppliers & contractors · AI estimation       */
+/* Drop into: app/page.tsx                                             */
 /* ------------------------------------------------------------------ */
 
 type Lang = 'ar' | 'en';
@@ -20,11 +20,15 @@ const ROLE_LABEL: Record<Lang, Record<Exclude<Role, null>, string>> = {
 const COPY = {
   ar: {
     dir: 'rtl' as const,
-    nav: { roles: 'اختر دورك', waitlist: 'اطلب وصول مبكر' },
+    nav: {
+      whatWeDo: 'ما نفعله',
+      signup: 'إنشاء حساب',
+      login: 'تسجيل الدخول',
+    },
     hero: {
-      eyebrow: 'تسعير وتوريد فوري لقطاع المقاولات في مصر',
-      title: ['من المقايسة للتسعير للتوريد — في ', 'دقائق', '.'],
-      sub: 'بنود بيقرأ مقايستك، يصنّف ويسعّر كل بند من السوق المصري لحظيًا، ويجهّزلك طلبات التوريد تبعتها للموردين على طول.',
+      eyebrow: 'منصة مشتريات لقطاع المقاولات',
+      title: ['ربط الموردين بالمقاولين — ', 'احصل على أفضل العروض', '.'],
+      sub: 'بنود منصة مشتريات تربط الموردين بالمقاولين. استقبل عروضًا تنافسية، قارن الأسعار، واختر الأفضل. التسعير الفوري بالذكاء الاصطناعي — قريبًا.',
       ctaPrimary: 'اطلب وصول مبكر',
       ctaSecondary: 'اختر دورك',
     },
@@ -59,7 +63,7 @@ const COPY = {
       ],
     },
     cta: {
-      title: 'كن أول من يسعّر ويورّد مع بنود.',
+      title: 'كن أول من يربط ويسعّر ويورّد مع بنود.',
       sub: 'سجّل في قائمة الوصول المبكر، وهنكلّمك على واتساب أول ما مكانك يجهز.',
     },
     form: {
@@ -72,15 +76,19 @@ const COPY = {
       errFail: 'حصل خطأ. جرّب تاني.',
       asTag: 'بتسجّل كـ',
     },
-    footer: { tag: 'بنود — التسعير والتوريد الفوري للمقاولات.', rights: 'كل الحقوق محفوظة.' },
+    footer: { tag: 'بنود — منصة المشتريات الفورية للمقاولات.', rights: 'كل الحقوق محفوظة.' },
   },
   en: {
     dir: 'ltr' as const,
-    nav: { roles: 'Choose your role', waitlist: 'Request early access' },
+    nav: {
+      whatWeDo: 'What we do',
+      signup: 'Sign up',
+      login: 'Login',
+    },
     hero: {
-      eyebrow: 'Instant BOQ pricing & procurement for Egyptian construction',
-      title: ['From BOQ to pricing to procurement — in ', 'minutes', '.'],
-      sub: 'Bunood reads your BOQ, classifies and prices every line from the live Egyptian market, and turns it into supplier RFQs you can send instantly.',
+      eyebrow: 'Procurement platform for construction',
+      title: ['Connect suppliers & contractors — ', 'get the best bids', '.'],
+      sub: 'Bunood is a procurement system that connects suppliers and contractors. Get competitive bids, compare offers, and choose the best prices. Instant cost estimation with AI — coming soon.',
       ctaPrimary: 'Request early access',
       ctaSecondary: 'Choose your role',
     },
@@ -89,7 +97,7 @@ const COPY = {
       label: 'How it works',
       steps: [
         { t: 'Upload your BOQ', d: 'PDF, Excel, or a phone scan — Bunood reads all three.' },
-        { t: 'Auto-classified', d: 'Each line matches Bunood’s library; AI fills the gaps and you confirm.' },
+        { t: 'Auto-classified', d: 'Each line matches Bunood's library; AI fills the gaps and you confirm.' },
         { t: 'Priced live', d: 'Real Egyptian rates down to the neighbourhood, refreshed continuously.' },
         { t: 'Instant RFQ', d: 'Turn lines into procurement requests and send to suppliers on WhatsApp or email.' },
       ],
@@ -108,15 +116,15 @@ const COPY = {
     feat: {
       label: 'Why bunood',
       items: [
-        { t: 'The library is the moat', d: 'Every BOQ you run sharpens the next. The catalogue compounds — it doesn’t reset.' },
+        { t: 'The library is the moat', d: 'Every BOQ you run sharpens the next. The catalogue compounds — it doesn't reset.' },
         { t: 'One engine, many recipes', d: 'The cost maths never change; only materials and coefficients do. Consistent, auditable.' },
         { t: 'Pricing that knows Cairo', d: 'Rates shift street to street, not just by governorate. Bunood tracks that granularity.' },
         { t: 'Procurement without the headache', d: 'RFQs go out by WhatsApp and email; quotes come back sorted and ready to compare.' },
       ],
     },
     cta: {
-      title: 'Be first to price and procure with Bunood.',
-      sub: 'Join the early-access list. We’ll reach out on WhatsApp when your seat is ready.',
+      title: 'Be first to connect, price, and procure with Bunood.',
+      sub: 'Join the early-access list. We'll reach out on WhatsApp when your seat is ready.',
     },
     form: {
       email: 'you@company.com',
@@ -128,7 +136,7 @@ const COPY = {
       errFail: 'Something went wrong. Try again.',
       asTag: 'Joining as',
     },
-    footer: { tag: 'Bunood — instant pricing & procurement for construction.', rights: 'All rights reserved.' },
+    footer: { tag: 'Bunood — instant procurement for construction.', rights: 'All rights reserved.' },
   },
 } as const;
 
@@ -165,11 +173,12 @@ export default function Home() {
         <div className="bn-wrap bn-header-in">
           <Logo />
           <nav className="bn-nav">
-            <a href="#roles" className="bn-navlink">{t.nav.roles}</a>
+            <a href="#how" className="bn-navlink">{t.nav.whatWeDo}</a>
             <button className="bn-lang" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label="Switch language">
               {lang === 'ar' ? 'EN' : 'العربية'}
             </button>
-            <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.waitlist}</a>
+            <a href="#waitlist" className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</a>
+            <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </nav>
         </div>
       </header>
@@ -202,7 +211,7 @@ export default function Home() {
       </div>
 
       {/* how it works */}
-      <section className="bn-section">
+      <section className="bn-section" id="how">
         <div className="bn-wrap">
           <span className="bn-label">{t.how.label}</span>
           <div className="bn-steps">
@@ -276,19 +285,21 @@ export default function Home() {
   );
 }
 
-/* ---- logo (matches real asset: graphite icon, blue TL+BR brackets,
-        blue top bar + two white bars) -------------------------------- */
+/* ---- logo — matches brand sheet exactly ---------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const s = small ? 24 : 30;
+  const s = small ? 24 : 32;
   return (
     <span className="bn-logo" dir="ltr">
-      <svg width={s} height={s} viewBox="0 0 40 40" aria-hidden className="bn-mark">
-        <rect x="0" y="0" width="40" height="40" rx="9" fill="#2C313A" />
-        <path d="M12.5 17.5 V12.5 H17.5" fill="none" stroke="#2F6FE0" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M27.5 22.5 V27.5 H22.5" fill="none" stroke="#2F6FE0" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-        <line x1="15.5" y1="16" x2="27" y2="16" stroke="#2F6FE0" strokeWidth="2.6" strokeLinecap="round" />
-        <line x1="14.5" y1="20.5" x2="28" y2="20.5" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
-        <line x1="15.5" y1="25" x2="24" y2="25" stroke="#FFFFFF" strokeWidth="2.6" strokeLinecap="round" />
+      <svg width={s} height={s} viewBox="0 0 96 96" fill="none" aria-hidden>
+        <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
+          <path d="M20 38 V23 Q20 20 23 20 H38" fill="none" />
+          <path d="M76 58 V73 Q76 76 73 76 H58" fill="none" />
+        </g>
+        <g strokeWidth="6.5" strokeLinecap="round">
+          <line x1="33" y1="38" x2="66" y2="38" stroke="#2C313A" />
+          <line x1="33" y1="48" x2="58" y2="48" stroke="#2F6FE0" />
+          <line x1="33" y1="58" x2="63" y2="58" stroke="#2C313A" />
+        </g>
       </svg>
       <span className="bn-word">bun<span className="bn-accent">oo</span>d</span>
     </span>
@@ -373,13 +384,10 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, whatsapp: wa, role, lang }),
       });
-
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        const errorMsg = body?.error || c.errFail;
-        throw new Error(errorMsg);
+        throw new Error(body?.error || c.errFail);
       }
-
       setStatus('ok'); setMsg(c.success); setEmail(''); setWa('');
     } catch (error) {
       setStatus('err');
@@ -424,20 +432,17 @@ function GlobalStyle() {
 .bn-wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
 .bn-accent{color:var(--blue);}
 
-/* header */
 .bn-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);
   backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);}
 .bn-header-in{display:flex;align-items:center;justify-content:space-between;height:66px;}
-.bn-logo{display:inline-flex;align-items:center;gap:9px;}
-.bn-mark{flex:none;border-radius:7px;}
+.bn-logo{display:inline-flex;align-items:center;gap:10px;}
 .bn-word{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;color:var(--graphite);}
-.bn-nav{display:flex;align-items:center;gap:18px;}
+.bn-nav{display:flex;align-items:center;gap:12px;}
 .bn-navlink{font-family:var(--display);font-weight:500;font-size:14.5px;color:var(--graphite);text-decoration:none;}
 .bn-navlink:hover{color:var(--blue);}
 .bn-lang{background:none;border:none;cursor:pointer;font-family:var(--display);font-weight:500;font-size:14px;color:var(--graphite);padding:6px;}
 .bn-lang:hover{color:var(--blue);}
 
-/* buttons */
 .bn-btn{font-family:var(--display);font-weight:600;font-size:15px;color:#fff;background:var(--blue);
   border:none;border-radius:10px;padding:13px 24px;cursor:pointer;text-decoration:none;display:inline-block;
   transition:transform .12s ease,background .15s ease;white-space:nowrap;}
@@ -445,10 +450,9 @@ function GlobalStyle() {
 .bn-btn:active{transform:translateY(0);}
 .bn-btn:disabled{opacity:.6;cursor:default;transform:none;}
 .bn-btn-sm{padding:9px 17px;font-size:14px;border-radius:9px;}
-.bn-btn-ghost{background:transparent;color:var(--blue);border:1px solid var(--line);}
+.bn-btn-ghost{background:transparent;color:var(--blue);border:1.5px solid var(--line);}
 .bn-btn-ghost:hover{background:var(--blue-soft);border-color:var(--blue);}
 
-/* hero */
 .bn-hero{position:relative;padding:84px 0 72px;background:#2C313A;overflow:hidden;}
 .bn-hero::before{content:'';position:absolute;inset:0;z-index:0;
   background-image:linear-gradient(125deg,rgba(20,23,28,.92),rgba(20,23,28,.56)),url('/hero-bg.jpg');
@@ -467,28 +471,24 @@ function GlobalStyle() {
 .bn-hero .bn-btn-ghost{border-color:rgba(255,255,255,.32);color:#fff;background:transparent;}
 .bn-hero .bn-btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.6);}
 
-/* selling strip */
 .bn-strip{background:var(--graphite);}
 .bn-strip-in{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:center;padding:18px 24px;}
 .bn-strip-item{font-family:var(--display);font-weight:500;font-size:15px;color:#e7eaee;position:relative;}
 .bn-strip-item::before{content:'';display:inline-block;width:7px;height:7px;border-radius:2px;
   background:var(--blue);margin-inline-end:10px;vertical-align:middle;}
 
-/* sections */
 .bn-section{padding:84px 0;}
 .bn-section-alt{background:var(--mist);}
 .bn-label{display:block;font-family:var(--mono);font-size:12.5px;letter-spacing:.05em;
   color:var(--grey);margin-bottom:18px;}
 .bn-h2{font-family:var(--display);font-weight:700;font-size:clamp(26px,3.3vw,38px);letter-spacing:-.01em;margin:0 0 14px;}
 
-/* steps */
 .bn-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:18px;}
 .bn-step-num{font-family:var(--mono);font-size:14px;color:var(--blue);font-weight:600;display:block;
   width:38px;border-top:2px solid var(--blue);padding-top:14px;margin-bottom:12px;}
 .bn-step-t{font-family:var(--display);font-weight:600;font-size:18.5px;margin:0 0 8px;}
 .bn-step-d{font-size:15px;color:#5a626e;margin:0;}
 
-/* roles */
 .bn-roles-sub{margin-bottom:30px;}
 .bn-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
 .bn-role{text-align:inherit;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:28px;
@@ -501,7 +501,6 @@ function GlobalStyle() {
 .bn-role-d{font-size:15px;color:#5a626e;margin:0 0 16px;}
 .bn-role-cta{font-family:var(--display);font-weight:600;font-size:14.5px;color:var(--blue);}
 
-/* features */
 .bn-feats{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px;}
 .bn-feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;
   transition:transform .15s ease,box-shadow .15s ease;}
@@ -511,7 +510,6 @@ function GlobalStyle() {
   background:var(--blue);margin-inline-end:9px;vertical-align:middle;}
 .bn-feat-d{font-size:15px;color:#5a626e;margin:0;}
 
-/* ledger */
 .bn-ledger{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
   box-shadow:0 18px 50px -24px rgba(44,49,58,.35);font-family:var(--mono);
   animation:bn-rise .8s cubic-bezier(.2,.7,.2,1) .08s both;}
@@ -531,14 +529,10 @@ function GlobalStyle() {
 .bn-row.is-c .bn-code{color:#fff;background:var(--blue);border-radius:5px;padding:3px 6px;justify-self:start;font-size:11px;animation:bn-pop .35s ease both;}
 .bn-amt{color:var(--graphite);font-weight:500;}
 .bn-row.is-p .bn-amt{color:var(--blue);}
-.bn-sk{display:inline-block;width:46px;height:9px;border-radius:4px;
-  background:linear-gradient(90deg,#eef0f3,#e2e6ea,#eef0f3);background-size:200% 100%;animation:bn-shimmer 1.3s linear infinite;}
-.bn-sk-code{width:30px;}
 .bn-ledger-total{height:54px;background:var(--graphite);color:#fff;font-family:var(--display);}
 .bn-ledger-total>span:first-child{grid-column:1 / 4;font-size:13px;color:#c7ccd3;}
 .bn-total-val{grid-column:4 / 6;text-align:right;font-family:var(--mono);font-weight:600;font-size:16px;color:#fff;font-variant-numeric:tabular-nums;}
 
-/* cta */
 .bn-cta{background:var(--graphite);color:#fff;text-align:center;}
 .bn-cta-in{max-width:640px;}
 .bn-cta .bn-h2{color:#fff;}
@@ -555,23 +549,17 @@ function GlobalStyle() {
 .bn-form-ok{font-family:var(--display);font-weight:500;font-size:16px;color:#fff;
   background:rgba(47,111,224,.2);padding:14px 18px;border-radius:10px;display:inline-block;margin-top:28px;}
 
-/* footer */
 .bn-footer{border-top:1px solid var(--line);padding:30px 0;}
 .bn-footer-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
 .bn-foot-tag{font-size:14px;color:#5a626e;}
 .bn-foot-rights{font-family:var(--mono);font-size:12px;color:var(--grey);margin-inline-start:auto;}
 
-/* motion */
 @keyframes bn-rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
 @keyframes bn-pop{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
-@keyframes bn-shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
 @media (prefers-reduced-motion:reduce){
   .bn-hero-copy,.bn-ledger{animation:none;}
-  .bn-sk{animation:none;}
   .bn-btn,.bn-feat,.bn-role{transition:none;}
 }
-
-/* responsive */
 @media (max-width:900px){
   .bn-hero-grid{grid-template-columns:1fr;gap:40px;}
   .bn-steps{grid-template-columns:repeat(2,1fr);gap:26px;}
@@ -582,7 +570,7 @@ function GlobalStyle() {
 }
 @media (max-width:520px){
   .bn-steps{grid-template-columns:1fr;}
-  .bn-nav{gap:12px;}
+  .bn-nav{gap:8px;}
   .bn-navlink{display:none;}
 }
 `}} />
