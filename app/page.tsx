@@ -179,7 +179,7 @@ export default function Home() {
             <button className="bn-modal-close" onClick={closeModal} aria-label="Close">✕</button>
             <p className="bn-modal-eyebrow">{lang === 'ar' ? 'إنشاء حساب' : 'Create account'}</p>
             <h2 className="bn-modal-title">{lang === 'ar' ? 'انت مين في المشروع؟' : 'What is your role?'}</h2>
-            <p className="bn-modal-sub">{lang === 'ar' ? 'اختر دورك وهنخصّص تجربتك من اللحظة الأولى.' : 'Pick your role and we'll tailor the experience from day one.'}</p>
+            <p className="bn-modal-sub">{lang === 'ar' ? 'اختر دورك وهنخصّص تجربتك من اللحظة الأولى.' : "Pick your role and we'll tailor the experience from day one."}</p>
             <div className="bn-modal-roles">
               {([
                 { id: 'engineer' as const,   ar: 'مهندس / استشاري',  en: 'Engineer / Consultant', arSub: 'سعّر المقايسات وصدّر التقارير.', enSub: 'Price BOQs and export reports.' },
