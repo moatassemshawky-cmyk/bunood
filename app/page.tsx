@@ -156,6 +156,7 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 export default function Home() {
   const [lang, setLang] = useState<Lang>('ar');
   const [role, setRole] = useState<Role>(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const t = COPY[lang];
 
   const pickRole = (r: Exclude<Role, null>) => {
@@ -164,16 +165,44 @@ export default function Home() {
     document.getElementById('waitlist')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
   };
 
+  const openModal = () => setShowRoleModal(true);
+  const closeModal = () => setShowRoleModal(false);
+
   return (
     <div className="bn-root" dir={t.dir} lang={lang}>
       <GlobalStyle />
+
+      {/* role selection modal */}
+      {showRoleModal && (
+        <div className="bn-modal-backdrop" onClick={closeModal} dir={t.dir}>
+          <div className="bn-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+            <button className="bn-modal-close" onClick={closeModal} aria-label="Close">✕</button>
+            <p className="bn-modal-eyebrow">{lang === 'ar' ? 'إنشاء حساب' : 'Create account'}</p>
+            <h2 className="bn-modal-title">{lang === 'ar' ? 'انت مين في المشروع؟' : 'What is your role?'}</h2>
+            <p className="bn-modal-sub">{lang === 'ar' ? 'اختر دورك وهنخصّص تجربتك من اللحظة الأولى.' : 'Pick your role and we'll tailor the experience from day one.'}</p>
+            <div className="bn-modal-roles">
+              {([
+                { id: 'engineer' as const,   ar: 'مهندس / استشاري',  en: 'Engineer / Consultant', arSub: 'سعّر المقايسات وصدّر التقارير.', enSub: 'Price BOQs and export reports.' },
+                { id: 'contractor' as const, ar: 'مقاول',             en: 'Contractor',            arSub: 'من المقايسة للتوريد أسرع.', enSub: 'From BOQ to procurement, faster.' },
+                { id: 'supplier' as const,   ar: 'مورّد',             en: 'Supplier',              arSub: 'استقبل الطلبات وابعت عروضك.', enSub: 'Receive RFQs and send your quotes.' },
+              ]).map(item => (
+                <button key={item.id} className="bn-role-card" onClick={() => { pickRole(item.id); closeModal(); }}>
+                  <span className="bn-role-card-icon"><RoleIcon id={item.id} /></span>
+                  <span className="bn-role-card-label">{lang === 'ar' ? item.ar : item.en}</span>
+                  <span className="bn-role-card-sub">{lang === 'ar' ? item.arSub : item.enSub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* header */}
       <header className="bn-header">
         <div className="bn-wrap bn-header-in">
           <Logo />
           <div className="bn-nav-ctas">
-            <a href="#waitlist" className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</a>
+            <button onClick={openModal} className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</button>
             <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </div>
           <nav className="bn-nav">
@@ -558,6 +587,36 @@ function GlobalStyle() {
 .bn-foot-tag{font-size:14px;color:#5a626e;}
 .bn-foot-rights{font-family:var(--mono);font-size:12px;color:var(--grey);margin-inline-start:auto;}
 
+/* modal */
+.bn-modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(20,23,28,.72);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  animation:bn-fade-in .2s ease both;}
+.bn-modal{background:#fff;border-radius:20px;padding:40px 36px 36px;max-width:600px;width:100%;
+  position:relative;animation:bn-modal-in .25s cubic-bezier(.2,.7,.2,1) both;
+  box-shadow:0 32px 80px -20px rgba(0,0,0,.45);}
+.bn-modal-close{position:absolute;top:16px;inset-inline-end:16px;background:var(--mist);
+  border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:14px;
+  color:var(--grey);display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.bn-modal-close:hover{background:var(--line);}
+.bn-modal-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--blue);
+  text-transform:uppercase;margin:0 0 10px;}
+.bn-modal-title{font-family:var(--display);font-weight:700;font-size:26px;margin:0 0 8px;color:var(--graphite);}
+.bn-modal-sub{font-size:15px;color:#5a626e;margin:0 0 28px;}
+.bn-modal-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.bn-role-card{background:#fafbfc;border:1.5px solid var(--line);border-radius:14px;
+  padding:22px 16px 20px;cursor:pointer;text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:10px;transition:border-color .15s,box-shadow .15s,transform .15s;
+  font-family:inherit;}
+.bn-role-card:hover{border-color:var(--blue);box-shadow:0 6px 24px -8px rgba(47,111,224,.22);transform:translateY(-2px);}
+.bn-role-card-icon{width:52px;height:52px;border-radius:12px;background:var(--blue-soft);
+  display:flex;align-items:center;justify-content:center;color:var(--blue);}
+.bn-role-card-icon .bn-role-ic{width:26px;height:26px;}
+.bn-role-card-label{font-family:var(--display);font-weight:600;font-size:15px;color:var(--graphite);}
+.bn-role-card-sub{font-size:13px;color:#6b7480;line-height:1.5;}
+@keyframes bn-fade-in{from{opacity:0;}to{opacity:1;}}
+@keyframes bn-modal-in{from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:none;}}
+
 @keyframes bn-rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
 @keyframes bn-pop{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
 @media (prefers-reduced-motion:reduce){
@@ -576,6 +635,8 @@ function GlobalStyle() {
   .bn-steps{grid-template-columns:1fr;}
   .bn-nav{gap:8px;}
   .bn-navlink{display:none;}
+  .bn-modal-roles{grid-template-columns:1fr;}
+  .bn-modal{padding:32px 20px 28px;}
 }
 `}} />
   );
