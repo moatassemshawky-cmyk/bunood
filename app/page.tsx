@@ -460,7 +460,7 @@ function GlobalStyle() {
 .bn-hero::before{content:'';position:absolute;inset:0;z-index:0;
   background-image:linear-gradient(125deg,rgba(20,23,28,.92),rgba(20,23,28,.56)),url('/hero-bg.jpg');
   background-size:cover;background-position:center;}
-.bn-hero .bn-wrap{position:relative;z-index:1;max-width:1320px;}
+.bn-hero .bn-wrap{position:relative;z-index:1;max-width:1320px;padding-left:0;}
 .bn-hero-grid{display:grid;grid-template-columns:0.88fr 1.08fr;gap:40px;align-items:center;}
 .bn-hero-copy{animation:bn-rise .7s cubic-bezier(.2,.7,.2,1) both;}
 .bn-eyebrow{display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;
