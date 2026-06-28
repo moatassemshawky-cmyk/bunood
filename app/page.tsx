@@ -97,7 +97,7 @@ const COPY = {
       label: 'How it works',
       steps: [
         { t: 'Upload your BOQ', d: 'PDF, Excel, or a phone scan — Bunood reads all three.' },
-        { t: 'Auto-classified', d: 'Each line matches Bunood's library; AI fills the gaps and you confirm.' },
+        { t: 'Auto-classified', d: "Each line matches Bunood's library; AI fills the gaps and you confirm." },
         { t: 'Priced live', d: 'Real Egyptian rates down to the neighbourhood, refreshed continuously.' },
         { t: 'Instant RFQ', d: 'Turn lines into procurement requests and send to suppliers on WhatsApp or email.' },
       ],
@@ -116,7 +116,7 @@ const COPY = {
     feat: {
       label: 'Why bunood',
       items: [
-        { t: 'The library is the moat', d: 'Every BOQ you run sharpens the next. The catalogue compounds — it doesn't reset.' },
+        { t: 'The library is the moat', d: "Every BOQ you run sharpens the next. The catalogue compounds — it doesn't reset." },
         { t: 'One engine, many recipes', d: 'The cost maths never change; only materials and coefficients do. Consistent, auditable.' },
         { t: 'Pricing that knows Cairo', d: 'Rates shift street to street, not just by governorate. Bunood tracks that granularity.' },
         { t: 'Procurement without the headache', d: 'RFQs go out by WhatsApp and email; quotes come back sorted and ready to compare.' },
@@ -124,7 +124,7 @@ const COPY = {
     },
     cta: {
       title: 'Be first to connect, price, and procure with Bunood.',
-      sub: 'Join the early-access list. We'll reach out on WhatsApp when your seat is ready.',
+      sub: "Join the early-access list. We'll reach out on WhatsApp when your seat is ready.",
     },
     form: {
       email: 'you@company.com',
