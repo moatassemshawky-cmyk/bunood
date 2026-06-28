@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   let client;
   try {
     client = createNeonClient();
+    await client.connect();
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS early_access_signups (
