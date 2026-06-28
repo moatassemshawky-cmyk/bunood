@@ -172,13 +172,15 @@ export default function Home() {
       <header className="bn-header">
         <div className="bn-wrap bn-header-in">
           <Logo />
+          <div className="bn-nav-ctas">
+            <a href="#waitlist" className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</a>
+            <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
+          </div>
           <nav className="bn-nav">
             <a href="#how" className="bn-navlink">{t.nav.whatWeDo}</a>
             <button className="bn-lang" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label="Switch language">
               {lang === 'ar' ? 'EN' : 'العربية'}
             </button>
-            <a href="#waitlist" className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</a>
-            <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </nav>
         </div>
       </header>
@@ -186,6 +188,7 @@ export default function Home() {
       {/* hero */}
       <section className="bn-hero">
         <div className="bn-wrap bn-hero-grid">
+          <Ledger lang={lang} />
           <div className="bn-hero-copy">
             <span className="bn-eyebrow">{t.hero.eyebrow}</span>
             <h1 className="bn-h1">
@@ -197,7 +200,6 @@ export default function Home() {
               <a href="#roles" className="bn-btn bn-btn-ghost">{t.hero.ctaSecondary}</a>
             </div>
           </div>
-          <Ledger lang={lang} />
         </div>
       </section>
 
@@ -287,7 +289,7 @@ export default function Home() {
 
 /* ---- logo — matches brand sheet exactly ---------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const s = small ? 24 : 32;
+  const s = small ? 26 : 46;
   return (
     <span className="bn-logo" dir="ltr">
       <svg width={s} height={s} viewBox="0 0 96 96" fill="none" aria-hidden>
@@ -436,7 +438,8 @@ function GlobalStyle() {
   backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid var(--line);}
 .bn-header-in{display:flex;align-items:center;justify-content:space-between;height:66px;}
 .bn-logo{display:inline-flex;align-items:center;gap:10px;}
-.bn-word{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;color:var(--graphite);}
+.bn-word{font-family:var(--display);font-weight:600;font-size:28px;letter-spacing:-.01em;color:var(--graphite);}
+.bn-nav-ctas{display:flex;align-items:center;gap:10px;margin-inline-start:auto;}
 .bn-nav{display:flex;align-items:center;gap:12px;}
 .bn-navlink{font-family:var(--display);font-weight:500;font-size:14.5px;color:var(--graphite);text-decoration:none;}
 .bn-navlink:hover{color:var(--blue);}
