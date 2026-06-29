@@ -170,16 +170,16 @@ const COPY = {
   },
 } as const;
 
-/* ---- Demo ledger data ---------------------------------------------- */
-type LedgerRow = { code: string; ar: string; en: string; unit: string; qty: number; rate: number };
+/* ---- Demo bid data ---------------------------------------------- */
+type BidRow = { id: string; arName: string; enName: string; price: number; days: number };
 
-const LEDGER_ROWS: LedgerRow[] = [
-  { code: 'B07', ar: 'خرسانة مسلّحة — أعمدة', en: 'Reinforced concrete, columns', unit: 'm³',  qty: 64,   rate: 4850 },
-  { code: 'B12', ar: 'مباني طوب، 20 سم',       en: 'Brick blockwork, 20 cm',      unit: 'm²',  qty: 320,  rate: 285  },
-  { code: 'B19', ar: 'بياض محارة داخلي',        en: 'Internal cement plaster',     unit: 'm²',  qty: 540,  rate: 110  },
-  { code: 'B23', ar: 'بلاط سيراميك أرضيات',    en: 'Ceramic floor tiles',         unit: 'm²',  qty: 410,  rate: 240  },
-  { code: 'B41', ar: 'أسلاك نحاس، 3×2.5 مم²',  en: 'Cu wiring, 3×2.5 mm²',       unit: 'm.l', qty: 1200, rate: 64   },
+const BID_ROWS: BidRow[] = [
+  { id: 'S1', arName: 'شركة عصام للحديد',  enName: 'Essam Steel Co.',   price: 4720, days: 3 },
+  { id: 'S2', arName: 'دلتا للمواد',        enName: 'Delta Materials',   price: 4650, days: 2 },
+  { id: 'S3', arName: 'القاهرة للمقاولات', enName: 'Cairo Contractors', price: 4890, days: 5 },
+  { id: 'S4', arName: 'مصر للبناء',        enName: 'Misr Building Co.', price: 4780, days: 4 },
 ];
+const BEST_BID_IDX = 1; // Delta Materials — lowest price
 
 const formatNumber = (n: number) => n.toLocaleString('en-US');
 
@@ -418,61 +418,105 @@ function RoleIcon({ id }: { id: RoleId }) {
   );
 }
 
-/* ---- Animated ledger ----------------------------------------------- */
+/* ---- Animated bid dashboard --------------------------------------- */
 function Ledger({ lang }: { lang: Lang }) {
-  const N = LEDGER_ROWS.length;
+  const N = BID_ROWS.length;
   const [step, setStep] = useState(0);
 
-  const head = lang === 'ar'
-    ? { code: 'كود', item: 'البند', qty: 'كمية', rate: 'سعر', amount: 'إجمالي', total: 'إجمالي التقدير', file: 'مقايسة-المشروع.xlsx' }
-    : { code: 'Code', item: 'Item', qty: 'Qty', rate: 'Rate', amount: 'Amount', total: 'Total estimate', file: 'project-boq.xlsx' };
-
   useEffect(() => {
-    // useEffect is client-only; no need for typeof window guard.
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      setStep(2 * N);
-      return;
-    }
-    const id = setInterval(() => setStep(s => (s >= 2 * N + 6 ? 0 : s + 1)), 560);
+    if (prefersReduced) { setStep(N + 3); return; }
+    const id = setInterval(() => setStep(s => (s >= N + 9 ? 0 : s + 1)), 680);
     return () => clearInterval(id);
-  // N is LEDGER_ROWS.length — a module-level constant that never changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const classified = Math.min(step, N);
-  const priced     = Math.min(Math.max(step - N, 0), N);
-  const total      = LEDGER_ROWS.slice(0, priced).reduce((a, r) => a + r.qty * r.rate, 0);
+  const visibleBids = Math.min(step, N);
+  const showBest    = step >= N + 1;
+  const showSavings = step >= N + 2;
+
+  const bestPrice  = BID_ROWS[BEST_BID_IDX].price;
+  const worstPrice = Math.max(...BID_ROWS.map(r => r.price));
+  const savings    = (worstPrice - bestPrice) * 24; // 24 tonnes
+
+  const L = lang === 'ar'
+    ? {
+        file:       'لوحة-العروض.bunood',
+        item:       'حديد تسليح B500S',
+        spec:       '24 طن · تسليم 3 يوليو',
+        supplier:   'المورد',
+        priceUnit:  'سعر/طن',
+        delivery:   'التسليم',
+        days:       'ي',
+        bestBadge:  'أفضل سعر',
+        requesting: '...جاري طلب العروض',
+        received:   (n: number) => `تم استلام ${n} عروض`,
+        savingsLbl: 'توفير',
+        currency:   'ج.م',
+      }
+    : {
+        file:       'bid-dashboard.bunood',
+        item:       'Steel Reinforcement B500S',
+        spec:       '24 t · Due Jul 3',
+        supplier:   'Supplier',
+        priceUnit:  'Price/t',
+        delivery:   'Del.',
+        days:       'd',
+        bestBadge:  'Best Price',
+        requesting: 'Requesting bids…',
+        received:   (n: number) => `${n} bids received`,
+        savingsLbl: 'You save',
+        currency:   'EGP',
+      };
 
   return (
     <div className="bn-ledger" dir="ltr" aria-hidden>
+      {/* Title bar */}
       <div className="bn-ledger-bar">
         <span className="bn-dot" /><span className="bn-dot" /><span className="bn-dot" />
-        <span className="bn-ledger-name">{head.file}</span>
+        <span className="bn-ledger-name">{L.file}</span>
       </div>
-      <div className="bn-ledger-head">
-        <span>{head.code}</span>
-        <span className="bn-l-desc">{head.item}</span>
-        <span className="bn-l-num">{head.qty}</span>
-        <span className="bn-l-num">{head.rate}</span>
-        <span className="bn-l-num">{head.amount}</span>
+
+      {/* Item header */}
+      <div className="bn-bid-item">
+        <div className="bn-bid-item-name">{L.item}</div>
+        <div className="bn-bid-item-spec">{L.spec}</div>
+        <div className={`bn-bid-status${visibleBids > 0 ? ' is-received' : ''}`}>
+          {visibleBids === 0 ? L.requesting : L.received(visibleBids)}
+        </div>
       </div>
-      {LEDGER_ROWS.map((r, i) => {
-        const isC = i < classified;
-        const isP = i < priced;
+
+      {/* Column headers */}
+      <div className="bn-bid-head">
+        <span className="bn-l-bsup">{L.supplier}</span>
+        <span className="bn-l-bprice">{L.priceUnit}</span>
+        <span className="bn-l-bdel">{L.delivery}</span>
+      </div>
+
+      {/* Bid rows */}
+      {BID_ROWS.map((r, i) => {
+        const isBest    = i === BEST_BID_IDX;
+        const isVisible = i < visibleBids;
+        const highlight = isBest && showBest;
         return (
-          <div className={`bn-row${isC ? ' is-c' : ''}${isP ? ' is-p' : ''}`} key={r.code}>
-            <span className="bn-code">{isC ? r.code : <span className="bn-pending">—</span>}</span>
-            <span className="bn-l-desc">{lang === 'ar' ? r.ar : r.en}</span>
-            <span className="bn-l-num">{r.qty} {r.unit}</span>
-            <span className="bn-l-num">{isP ? formatNumber(r.rate) : <span className="bn-pending">—</span>}</span>
-            <span className="bn-l-num bn-amt">{isP ? formatNumber(r.qty * r.rate) : <span className="bn-pending">—</span>}</span>
+          <div
+            key={r.id}
+            className={`bn-bid-row${isVisible ? ' is-visible' : ''}${highlight ? ' is-best' : ''}`}
+          >
+            <span className="bn-l-bsup">
+              <span className="bn-sup-name">{lang === 'ar' ? r.arName : r.enName}</span>
+              {highlight && <span className="bn-best-badge">{L.bestBadge}</span>}
+            </span>
+            <span className="bn-l-bprice bn-bamt">{isVisible ? formatNumber(r.price) : '—'}</span>
+            <span className="bn-l-bdel">{isVisible ? `${r.days}${L.days}` : '—'}</span>
           </div>
         );
       })}
-      <div className="bn-ledger-total">
-        <span>{head.total}</span>
-        <span className="bn-total-val">EGP {formatNumber(total)}</span>
+
+      {/* Savings footer */}
+      <div className={`bn-bid-savings${showSavings ? ' is-visible' : ''}`}>
+        <span>{L.savingsLbl}</span>
+        <span className="bn-savings-val">{L.currency} {formatNumber(savings)}</span>
       </div>
     </div>
   );
