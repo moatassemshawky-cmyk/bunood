@@ -29,9 +29,13 @@ const ibmMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.bunood.com'),
   title: 'bunood — منصة المشتريات الفورية للمقاولات',
   description:
     'Bunood connects contractors and suppliers for instant procurement and AI-powered BOQ estimation.',
+  alternates: {
+    canonical: 'https://www.bunood.com',
+  },
   icons: {
     icon: [
       { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
