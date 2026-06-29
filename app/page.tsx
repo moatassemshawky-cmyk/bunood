@@ -47,10 +47,17 @@ const COPY = {
     },
     hero: {
       eyebrow: 'منصة مشتريات بالذكاء الاصطناعي',
-      title: ['ارفع ملف الكميات. ', 'الذكاء الاصطناعي يتولى الباقي.', ''],
-      sub: 'بنود يحلّل كمياتك، يرسل طلبات الأسعار تلقائياً لموردين متنافسين، يجمع عروضهم، ويوصيك بأفضل سعر — كل شيء تلقائياً في منصة واحدة.',
-      ctaPrimary: 'ابدأ المشتريات',
-      ctaSecondary: 'شاهد العرض',
+      title: ['منصة مشتريات ذكية ', 'تبني مشاريع أفضل.', ''],
+      sub: 'نوفّر لك كل ما تحتاجه لشراء مواد البناء والخدمات بكفاءة وشفافية — مقارنات ذكية، عروض تنافسية، وقرارات توفّر الوقت والمال.',
+      ctaPrimary: 'ابدأ مشروعك الآن',
+      ctaSecondary: 'شاهد كيف يعمل',
+      proof: 'انضم إلى مئات الشركات التي تبني مستقبلها مع bunood',
+      features: [
+        { icon: 'award' as const, title: 'عروض تنافسية',  desc: 'احصل على أفضل الأسعار من موردين موثوقين.' },
+        { icon: 'clock' as const, title: 'توفير الوقت',   desc: 'أتمتة عملية المشتريات من الطلب حتى الترسية.' },
+        { icon: 'shield' as const, title: 'شفافية كاملة', desc: 'مقارنة عادلة وبيانات واضحة لأفضل القرارات.' },
+        { icon: 'chart' as const, title: 'تقارير ذكية',  desc: 'تحليلات دقيقة لمساعدتك في خفض التكاليف.' },
+      ],
     },
     strip: ['وداعًا لأسابيع الإكسيل.', 'أسعار حقيقية، حي بحي — مش متوسطات.', 'الموردين في إيدك، قارن العروض في دقايق.'],
     how: {
@@ -112,10 +119,17 @@ const COPY = {
     },
     hero: {
       eyebrow: 'AI Procurement Platform',
-      title: ['Upload your BOQ. ', 'AI handles the rest.', ''],
-      sub: 'Bunood analyzes your quantities, auto-sends RFQs to competing suppliers, collects all quotes, and surfaces the best offer — fully automated.',
-      ctaPrimary: 'Start procurement',
+      title: ['Smart Procurement, ', 'Better Projects.', ''],
+      sub: 'Everything you need to procure construction materials and services efficiently and transparently — smart comparisons, competitive bids, decisions that save time and money.',
+      ctaPrimary: 'Start your project',
       ctaSecondary: 'See how it works',
+      proof: 'Join hundreds of companies building their future with bunood',
+      features: [
+        { icon: 'award' as const, title: 'Competitive Bids',   desc: 'Get the best prices from verified suppliers.' },
+        { icon: 'clock' as const, title: 'Save Time',          desc: 'Automate procurement from request to award.' },
+        { icon: 'shield' as const, title: 'Full Transparency', desc: 'Fair comparisons and clear data for better decisions.' },
+        { icon: 'chart' as const, title: 'Smart Reports',      desc: 'Detailed analytics to help you cut costs.' },
+      ],
     },
     strip: ['Goodbye, weeks in Excel.', 'Real rates, street by street — not averages.', 'Suppliers at hand — compare quotes in minutes.'],
     how: {
@@ -172,8 +186,8 @@ const COPY = {
 
 /* ---- Procurement OS dashboard data --------------------------------- */
 const PROC_STEPS = {
-  en: ['BOQ', 'Analysis', 'RFQs', 'Offers', 'AI Pick'],
-  ar: ['الكميات', 'التحليل', 'RFQ', 'العروض', 'اختيار AI'],
+  en: ['BOQ', 'Analysis', 'RFQs', 'Comparing', 'Award'],
+  ar: ['تجميع الكميات', 'تحليل الأسعار', 'طلبات الموردين', 'مقارنة العروض', 'الترسية'],
 };
 const ACTIVITY_DATA = {
   en: [
@@ -292,10 +306,22 @@ export default function Home() {
               {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span><span className="bn-h1-trail">{t.hero.title[2]}</span>
             </h1>
             <p className="bn-hero-lede">{t.hero.sub}</p>
+            <div className="bn-hero-features">
+              {t.hero.features.map(f => (
+                <div className="bn-feat-item" key={f.title}>
+                  <span className="bn-feat-icon"><HeroIcon icon={f.icon} /></span>
+                  <span className="bn-feat-body">
+                    <span className="bn-feat-title">{f.title}</span>
+                    <span className="bn-feat-desc">{f.desc}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
             <div className="bn-hero-cta">
               <a href="#waitlist" className="bn-btn">{t.hero.ctaPrimary}</a>
               <a href="#roles" className="bn-btn bn-btn-ghost">{t.hero.ctaSecondary}</a>
             </div>
+            <p className="bn-hero-proof">{t.hero.proof}</p>
           </div>
 
         </div>
@@ -425,6 +451,19 @@ function RoleIcon({ id }: { id: RoleId }) {
   );
 }
 
+/* ---- Hero feature icons -------------------------------------------- */
+function HeroIcon({ icon }: { icon: 'award' | 'clock' | 'shield' | 'chart' }) {
+  const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+      {icon === 'award' && (<><circle {...p} cx="12" cy="8" r="6"/><path {...p} d="M8.2 14.3 7 22l5-3 5 3-1.2-7.7"/></>)}
+      {icon === 'clock' && (<><circle {...p} cx="12" cy="12" r="9"/><path {...p} d="M12 7v5l3 3"/></>)}
+      {icon === 'shield' && (<><path {...p} d="M12 3 3 7v6c0 4.5 3.9 8.2 9 9 5.1-.8 9-4.5 9-9V7z"/><path {...p} d="M9 12l2 2 4-4"/></>)}
+      {icon === 'chart' && (<><path {...p} d="M3 3v18h18"/><path {...p} d="m7 16 4-6 4 4 4-7"/></>)}
+    </svg>
+  );
+}
+
 /* ---- Animated procurement OS dashboard ----------------------------- */
 function Ledger({ lang }: { lang: Lang }) {
   const [actStep, setActStep] = useState(0);
@@ -441,43 +480,43 @@ function Ledger({ lang }: { lang: Lang }) {
   const visAct   = Math.min(actStep, 3);
 
   const L = lang === 'ar' ? {
-    file:       'نظام-المشتريات.bunood',
-    live:       'مباشر',
-    project:    'برج A — بنية تحتية',
-    projectId:  'المشروع #BN-2847',
-    suppliers:  'مورد مدعو',
-    offers:     'عرض وصل',
-    bestPrice:  'أفضل سعر',
-    savings:    'التوفير',
-    currency:   'ر.س',
-    bestVal:    '1.24M',
-    savingsVal: '218K',
-    aiRec:      'توصية الذكاء الاصطناعي',
-    suppName:   'دلتا للصلب والمواد',
-    suppSub:    'ر.س 1,245,000 · تسليم 14 يوم · موردٌ معتمد',
-    match:      '98% تطابق',
-    acceptBtn:  '✓ قبول العرض',
+    file:           'نظام-المشتريات.bunood',
+    live:           'مباشر',
+    project:        'برج A — بنية تحتية',
+    projectId:      'المشروع #BN-2847',
+    m1Lbl: 'طلبات مكتملة',  m1Val: '127',            m1Sub: 'طلب',
+    m2Lbl: 'موردين مشاركين', m2Val: '46',             m2Sub: 'مورد',
+    m3Lbl: 'أفضل سعر',      m3Val: '١.٢٤ م.م',       m3Sub: 'ر.س',
+    m4Lbl: 'وفر متوقع',     m4Val: '↓ 218 ألف',      m4Sub: '(15%)',
+    aiRec:      'أفضل العروض',
+    aiSavings:  'توفير 15%',
+    suppName:   'شركة البناء المتقدمة',
+    suppPrice:  'ر.س 1,245,000',
+    suppDelivery: 'التسليم: 14 يوم',
+    suppPayment:  'الدفع: 30 يوم',
+    acceptBtn:  'عرض التفصيل والمقارنة ↙',
     compareBtn: 'مقارنة 46 عرضاً',
     liveTitle:  'نشاط مباشر',
+    footer:     'تحديث منذ 5 دقائق',
   } : {
-    file:       'procurement-os.bunood',
-    live:       'LIVE',
-    project:    'Tower Block A — Infrastructure',
-    projectId:  'Project #BN-2847',
-    suppliers:  'Suppliers invited',
-    offers:     'Offers received',
-    bestPrice:  'Best price',
-    savings:    'AI savings',
-    currency:   'SAR',
-    bestVal:    '1.24M',
-    savingsVal: '218K',
-    aiRec:      'AI Recommendation',
-    suppName:   'Delta Steel & Materials',
-    suppSub:    'SAR 1,245,000 · 14-day delivery · Tier 1 Certified',
-    match:      '98% match',
-    acceptBtn:  '✓ Accept Offer',
+    file:           'procurement-os.bunood',
+    live:           'LIVE',
+    project:        'Tower Block A — Infrastructure',
+    projectId:      'Project #BN-2847',
+    m1Lbl: 'Completed RFQs',       m1Val: '127',     m1Sub: 'requests',
+    m2Lbl: 'Active Suppliers',     m2Val: '46',      m2Sub: 'suppliers',
+    m3Lbl: 'Best Price',           m3Val: '1.24M',   m3Sub: 'SAR',
+    m4Lbl: 'Expected Savings',     m4Val: '↓ 218K',  m4Sub: '(15%)',
+    aiRec:      'Best Offers',
+    aiSavings:  '15% savings',
+    suppName:   'Advanced Building Co.',
+    suppPrice:  'SAR 1,245,000',
+    suppDelivery: 'Delivery: 14 days',
+    suppPayment:  'Payment: 30 days',
+    acceptBtn:  'View Details & Compare',
     compareBtn: 'Compare 46 offers',
     liveTitle:  'Live Activity',
+    footer:     'Updated 5 minutes ago',
   };
 
   return (
@@ -513,20 +552,24 @@ function Ledger({ lang }: { lang: Lang }) {
       {/* ── Metrics row ───────────────────────────── */}
       <div className="bn-metrics">
         <div className="bn-metric">
-          <span className="bn-metric-n">127</span>
-          <span className="bn-metric-l">{L.suppliers}</span>
+          <span className="bn-metric-t">{L.m1Lbl}</span>
+          <span className="bn-metric-n">{L.m1Val}</span>
+          <span className="bn-metric-l">{L.m1Sub}</span>
         </div>
         <div className="bn-metric">
-          <span className="bn-metric-n">46</span>
-          <span className="bn-metric-l">{L.offers}</span>
+          <span className="bn-metric-t">{L.m2Lbl}</span>
+          <span className="bn-metric-n">{L.m2Val}</span>
+          <span className="bn-metric-l">{L.m2Sub}</span>
         </div>
         <div className="bn-metric">
-          <span className="bn-metric-n">{L.currency} {L.bestVal}</span>
-          <span className="bn-metric-l">{L.bestPrice}</span>
+          <span className="bn-metric-t">{L.m3Lbl}</span>
+          <span className="bn-metric-n">{L.m3Val}</span>
+          <span className="bn-metric-l">{L.m3Sub}</span>
         </div>
         <div className="bn-metric bn-metric--savings">
-          <span className="bn-metric-n">↓ {L.currency} {L.savingsVal}</span>
-          <span className="bn-metric-l">{L.savings}</span>
+          <span className="bn-metric-t">{L.m4Lbl}</span>
+          <span className="bn-metric-n">{L.m4Val}</span>
+          <span className="bn-metric-l">{L.m4Sub}</span>
         </div>
       </div>
 
@@ -534,10 +577,16 @@ function Ledger({ lang }: { lang: Lang }) {
       <div className="bn-ai-rec">
         <div className="bn-ai-rec-top">
           <span className="bn-ai-label">{L.aiRec}</span>
-          <span className="bn-ai-score">{L.match}</span>
+          <span className="bn-ai-savings-badge">{L.aiSavings}</span>
         </div>
         <div className="bn-ai-supp">{L.suppName}</div>
-        <div className="bn-ai-supp-sub">{L.suppSub}</div>
+        <div className="bn-ai-detail-row">
+          <span className="bn-ai-detail-price">{L.suppPrice}</span>
+          <span className="bn-ai-detail-sep">·</span>
+          <span>{L.suppDelivery}</span>
+          <span className="bn-ai-detail-sep">·</span>
+          <span>{L.suppPayment}</span>
+        </div>
         <div className="bn-ai-btns">
           <button className="bn-accept-btn">{L.acceptBtn}</button>
           <button className="bn-compare-btn">{L.compareBtn}</button>
@@ -557,6 +606,12 @@ function Ledger({ lang }: { lang: Lang }) {
             <span className="bn-act-time">{a.time}</span>
           </div>
         ))}
+      </div>
+
+      {/* ── Card footer ───────────────────────────── */}
+      <div className="bn-card-ftr">
+        <span className="bn-card-ftr-dot" />
+        <span>{L.footer}</span>
       </div>
 
     </div>

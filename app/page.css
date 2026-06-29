@@ -67,38 +67,36 @@
 
 /* ---- Hero ---------------------------------------------------------- */
 
-/* Base */
+/* Base — hero-bg.jpg visible with dark overlay + blue glow stack */
 .bn-hero {
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
-  background: #0f1117;
+  background: url('/hero-bg.jpg') center / cover no-repeat #0f1117;
   overflow: hidden;
   display: flex;
   align-items: stretch;
 }
 
-/* Atmospheric blue glow — LTR: top-left; RTL variant below */
+/* Dark overlay so photo is visible but text stays readable */
 .bn-hero::before {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: rgba(8, 10, 18, 0.72);
+}
+
+/* Blue atmospheric glow on top of overlay — LTR: top-left */
+.bn-hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 65% 55% at 15% -5%, rgba(47,111,224,.25) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 35% at 88% 108%, rgba(47,111,224,.11) 0%, transparent 55%);
+    radial-gradient(ellipse 65% 55% at 15% -5%, rgba(47,111,224,.32) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 88% 108%, rgba(47,111,224,.18) 0%, transparent 55%);
 }
 
 /* RTL variant: flip glow to top-right */
-.bn-hero:has(.is-rtl)::before {
+.bn-hero:has(.is-rtl)::after {
   background:
-    radial-gradient(ellipse 65% 55% at 85% -5%, rgba(47,111,224,.25) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 35% at 12% 108%, rgba(47,111,224,.11) 0%, transparent 55%);
-}
-
-/* Faint background texture */
-.bn-hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: url('/hero-bg.jpg') center / cover;
-  opacity: .05;
-  mix-blend-mode: luminosity;
+    radial-gradient(ellipse 65% 55% at 85% -5%, rgba(47,111,224,.32) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 12% 108%, rgba(47,111,224,.18) 0%, transparent 55%);
 }
 
 /* Stage — full-viewport-width, no max-width, two-column */
@@ -198,6 +196,48 @@
   background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.4); color: #fff;
 }
 
+/* Hero features 2×2 grid */
+.bn-hero-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 22px;
+  margin: 26px 0 30px;
+}
+.bn-feat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+.bn-feat-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(47,111,224,.14);
+  border: 1px solid rgba(47,111,224,.24);
+  border-radius: 9px;
+  color: #7eb4ff;
+}
+.bn-feat-body { display: flex; flex-direction: column; }
+.bn-feat-title {
+  font-family: var(--display); font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,.88); margin-bottom: 2px;
+}
+.bn-feat-desc {
+  font-size: 11.5px; line-height: 1.55;
+  color: rgba(255,255,255,.46);
+}
+
+/* Hero social proof */
+.bn-hero-proof {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: rgba(255,255,255,.32);
+}
+.bn-hero-proof::before {
+  content: '✓  ';
+  color: #4ade80;
+  font-weight: 700;
+}
+
 /* ---- Ledger — Dark Glass (hero only) ----------------------------- */
 .bn-hero .bn-ledger {
   width: 100%; max-width: 520px; overflow: hidden;
@@ -257,6 +297,14 @@
 .bn-hero .bn-act-dot          { background: rgba(255,255,255,.2); }
 .bn-hero .bn-act-item.is-blue  .bn-act-dot { background: var(--blue); box-shadow: 0 0 6px rgba(47,111,224,.6); }
 .bn-hero .bn-act-item.is-green .bn-act-dot { background: #4ade80; }
+.bn-hero .bn-metric-t         { color: rgba(255,255,255,.32); }
+.bn-hero .bn-metric--savings .bn-metric-l { color: #4ade80; }
+.bn-hero .bn-ai-savings-badge { color: #4ade80; background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.25); }
+.bn-hero .bn-ai-detail-row    { color: rgba(255,255,255,.36); }
+.bn-hero .bn-ai-detail-price  { color: rgba(255,255,255,.82); }
+.bn-hero .bn-ai-detail-sep    { color: rgba(255,255,255,.15); }
+.bn-hero .bn-card-ftr         { border-top-color: rgba(255,255,255,.07); color: rgba(255,255,255,.28); }
+.bn-hero .bn-card-ftr-dot     { background: #4ade80; }
 
 /* Float animation */
 @keyframes bn-ledger-float {
@@ -356,9 +404,11 @@
 .bn-metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
 .bn-metric { padding: 10px 12px 11px; border-right: 1px solid var(--line); }
 .bn-metric:last-child { border-right: none; }
+.bn-metric-t { display: block; font-size: 10px; color: var(--grey); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bn-metric-n { display: block; font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--graphite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-.bn-metric-l { display: block; font-size: 10px; color: var(--grey); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bn-metric-l { display: block; font-size: 10px; color: var(--grey); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bn-metric--savings .bn-metric-n { color: #16a34a; }
+.bn-metric--savings .bn-metric-l { color: #16a34a; }
 
 /* ---- AI Recommendation panel ---- */
 .bn-ai-rec { padding: 11px 18px 12px; border-bottom: 1px solid var(--line); }
@@ -368,12 +418,27 @@
   color: var(--blue); display: flex; align-items: center; gap: 5px;
 }
 .bn-ai-label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; animation: bn-pulse 1.6s ease-in-out infinite; }
-.bn-ai-score { font-size: 11px; font-weight: 700; color: var(--blue); background: rgba(47,111,224,.1); border: 1px solid rgba(47,111,224,.2); border-radius: 100px; padding: 2px 9px; white-space: nowrap; }
-.bn-ai-supp { font-size: 14px; font-weight: 600; color: var(--graphite); margin-bottom: 3px; }
-.bn-ai-supp-sub { font-size: 11px; color: var(--grey); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bn-ai-savings-badge { font-size: 11px; font-weight: 700; color: #16a34a; background: rgba(22,163,74,.1); border: 1px solid rgba(22,163,74,.22); border-radius: 100px; padding: 2px 9px; white-space: nowrap; }
+.bn-ai-supp { font-size: 14px; font-weight: 600; color: var(--graphite); margin-bottom: 4px; }
+.bn-ai-detail-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--grey); margin-bottom: 10px; flex-wrap: wrap; }
+.bn-ai-detail-price { font-weight: 600; color: var(--graphite); }
+.bn-ai-detail-sep { color: rgba(154,163,174,.4); }
 .bn-ai-btns { display: flex; gap: 8px; }
 .bn-accept-btn { flex: 1; height: 32px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: default; white-space: nowrap; transition: box-shadow .2s; }
 .bn-compare-btn { height: 32px; padding: 0 12px; background: transparent; color: var(--graphite); border: 1px solid var(--line); border-radius: 8px; font-size: 11px; cursor: default; white-space: nowrap; }
+
+/* ---- Card footer ---- */
+.bn-card-ftr {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 18px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 11px; font-family: var(--mono); color: var(--grey);
+}
+.bn-card-ftr-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: #16a34a;
+  animation: bn-pulse 2s ease-in-out infinite;
+}
 
 /* ---- Live activity feed ---- */
 .bn-live-feed { padding: 10px 18px 13px; }
