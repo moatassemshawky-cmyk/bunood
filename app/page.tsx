@@ -273,19 +273,24 @@ export default function Home() {
 
       {/* ---- Hero --------------------------------------------------- */}
       <section className="bn-hero" aria-labelledby="hero-heading">
-        <div className="bn-wrap bn-hero-grid" dir="ltr">
-          <Ledger lang={lang} />
-          <div className="bn-hero-copy" dir={t.dir}>
+        <div className={`bn-hero-stage${lang === 'ar' ? ' is-rtl' : ''}`}>
+
+          <div className="bn-hero-ledger-col">
+            <Ledger lang={lang} />
+          </div>
+
+          <div className="bn-hero-copy-col" dir={t.dir}>
             <span className="bn-eyebrow">{t.hero.eyebrow}</span>
             <h1 id="hero-heading" className="bn-h1">
-              {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span>{t.hero.title[2]}
+              {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span><span className="bn-h1-trail">{t.hero.title[2]}</span>
             </h1>
-            <p className="bn-lede">{t.hero.sub}</p>
+            <p className="bn-hero-lede">{t.hero.sub}</p>
             <div className="bn-hero-cta">
               <a href="#waitlist" className="bn-btn">{t.hero.ctaPrimary}</a>
               <a href="#roles" className="bn-btn bn-btn-ghost">{t.hero.ctaSecondary}</a>
             </div>
           </div>
+
         </div>
       </section>
 
