@@ -46,11 +46,11 @@ const COPY = {
       login: 'تسجيل الدخول',
     },
     hero: {
-      eyebrow: 'منصة مشتريات لقطاع المقاولات',
-      title: ['وفّر في الوقت والتكلفة — ', 'عروض أسعار فورية من أفضل الموردين', '.'],
-      sub: 'بنود منصة مشتريات تربط الموردين بالمقاولين. استقبل عروضًا تنافسية، قارن الأسعار، واختر الأفضل. التسعير الفوري بالذكاء الاصطناعي — قريبًا.',
-      ctaPrimary: 'اطلب وصول مبكر',
-      ctaSecondary: 'اختر دورك',
+      eyebrow: 'منصة مشتريات بالذكاء الاصطناعي',
+      title: ['ارفع ملف الكميات. ', 'الذكاء الاصطناعي يتولى الباقي.', ''],
+      sub: 'بنود يحلّل كمياتك، يرسل طلبات الأسعار تلقائياً لموردين متنافسين، يجمع عروضهم، ويوصيك بأفضل سعر — كل شيء تلقائياً في منصة واحدة.',
+      ctaPrimary: 'ابدأ المشتريات',
+      ctaSecondary: 'شاهد العرض',
     },
     strip: ['وداعًا لأسابيع الإكسيل.', 'أسعار حقيقية، حي بحي — مش متوسطات.', 'الموردين في إيدك، قارن العروض في دقايق.'],
     how: {
@@ -111,11 +111,11 @@ const COPY = {
       login: 'Login',
     },
     hero: {
-      eyebrow: 'Procurement platform for construction',
-      title: ['Connect suppliers & contractors — ', 'get the best bids', '.'],
-      sub: 'Bunood is a procurement system that connects suppliers and contractors. Get competitive bids, compare offers, and choose the best prices. Instant cost estimation with AI — coming soon.',
-      ctaPrimary: 'Request early access',
-      ctaSecondary: 'Choose your role',
+      eyebrow: 'AI Procurement Platform',
+      title: ['Upload your BOQ. ', 'AI handles the rest.', ''],
+      sub: 'Bunood analyzes your quantities, auto-sends RFQs to competing suppliers, collects all quotes, and surfaces the best offer — fully automated.',
+      ctaPrimary: 'Start procurement',
+      ctaSecondary: 'See how it works',
     },
     strip: ['Goodbye, weeks in Excel.', 'Real rates, street by street — not averages.', 'Suppliers at hand — compare quotes in minutes.'],
     how: {
@@ -170,16 +170,23 @@ const COPY = {
   },
 } as const;
 
-/* ---- Demo bid data ---------------------------------------------- */
-type BidRow = { id: string; arName: string; enName: string; price: number; days: number };
-
-const BID_ROWS: BidRow[] = [
-  { id: 'S1', arName: 'شركة عصام للحديد',  enName: 'Essam Steel Co.',   price: 4720, days: 3 },
-  { id: 'S2', arName: 'دلتا للمواد',        enName: 'Delta Materials',   price: 4650, days: 2 },
-  { id: 'S3', arName: 'القاهرة للمقاولات', enName: 'Cairo Contractors', price: 4890, days: 5 },
-  { id: 'S4', arName: 'مصر للبناء',        enName: 'Misr Building Co.', price: 4780, days: 4 },
-];
-const BEST_BID_IDX = 1; // Delta Materials — lowest price
+/* ---- Procurement OS dashboard data --------------------------------- */
+const PROC_STEPS = {
+  en: ['BOQ', 'Analysis', 'RFQs', 'Offers', 'AI Pick'],
+  ar: ['الكميات', 'التحليل', 'RFQ', 'العروض', 'اختيار AI'],
+};
+const ACTIVITY_DATA = {
+  en: [
+    { txt: 'Delta Steel submitted final quotation', time: 'just now', type: 'blue'  },
+    { txt: 'Al-Masry Steel revised bid −4.2%',      time: '2m ago',   type: 'green' },
+    { txt: '3 new suppliers accepted the RFQ',      time: '6m ago',   type: 'grey'  },
+  ],
+  ar: [
+    { txt: 'دلتا ستيل قدّم عرضه النهائي',      time: 'الآن', type: 'blue'  },
+    { txt: 'الأهلي للحديد خفّض عرضه 4.2%',    time: 'م 2',  type: 'green' },
+    { txt: '3 موردين جدد قبلوا طلب الأسعار',  time: 'م 6',  type: 'grey'  },
+  ],
+};
 
 const formatNumber = (n: number) => n.toLocaleString('en-US');
 
@@ -418,106 +425,140 @@ function RoleIcon({ id }: { id: RoleId }) {
   );
 }
 
-/* ---- Animated bid dashboard --------------------------------------- */
+/* ---- Animated procurement OS dashboard ----------------------------- */
 function Ledger({ lang }: { lang: Lang }) {
-  const N = BID_ROWS.length;
-  const [step, setStep] = useState(0);
+  const [actStep, setActStep] = useState(0);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) { setStep(N + 3); return; }
-    const id = setInterval(() => setStep(s => (s >= N + 9 ? 0 : s + 1)), 680);
+    if (prefersReduced) { setActStep(3); return; }
+    const id = setInterval(() => setActStep(s => (s >= 5 ? 0 : s + 1)), 2200);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const visibleBids = Math.min(step, N);
-  const showBest    = step >= N + 1;
-  const showSavings = step >= N + 2;
+  const steps    = PROC_STEPS[lang];
+  const activity = ACTIVITY_DATA[lang];
+  const visAct   = Math.min(actStep, 3);
 
-  const bestPrice  = BID_ROWS[BEST_BID_IDX].price;
-  const worstPrice = Math.max(...BID_ROWS.map(r => r.price));
-  const savings    = (worstPrice - bestPrice) * 24; // 24 tonnes
-
-  const L = lang === 'ar'
-    ? {
-        file:       'لوحة-العروض.bunood',
-        item:       'حديد تسليح B500S',
-        spec:       '24 طن · تسليم 3 يوليو',
-        supplier:   'المورد',
-        priceUnit:  'سعر/طن',
-        delivery:   'التسليم',
-        days:       'ي',
-        bestBadge:  'أفضل سعر',
-        requesting: '...جاري طلب العروض',
-        received:   (n: number) => `تم استلام ${n} عروض`,
-        savingsLbl: 'توفير',
-        currency:   'ج.م',
-      }
-    : {
-        file:       'bid-dashboard.bunood',
-        item:       'Steel Reinforcement B500S',
-        spec:       '24 t · Due Jul 3',
-        supplier:   'Supplier',
-        priceUnit:  'Price/t',
-        delivery:   'Del.',
-        days:       'd',
-        bestBadge:  'Best Price',
-        requesting: 'Requesting bids…',
-        received:   (n: number) => `${n} bids received`,
-        savingsLbl: 'You save',
-        currency:   'EGP',
-      };
+  const L = lang === 'ar' ? {
+    file:       'نظام-المشتريات.bunood',
+    live:       'مباشر',
+    project:    'برج A — بنية تحتية',
+    projectId:  'المشروع #BN-2847',
+    suppliers:  'مورد مدعو',
+    offers:     'عرض وصل',
+    bestPrice:  'أفضل سعر',
+    savings:    'التوفير',
+    currency:   'ر.س',
+    bestVal:    '1.24M',
+    savingsVal: '218K',
+    aiRec:      'توصية الذكاء الاصطناعي',
+    suppName:   'دلتا للصلب والمواد',
+    suppSub:    'ر.س 1,245,000 · تسليم 14 يوم · موردٌ معتمد',
+    match:      '98% تطابق',
+    acceptBtn:  '✓ قبول العرض',
+    compareBtn: 'مقارنة 46 عرضاً',
+    liveTitle:  'نشاط مباشر',
+  } : {
+    file:       'procurement-os.bunood',
+    live:       'LIVE',
+    project:    'Tower Block A — Infrastructure',
+    projectId:  'Project #BN-2847',
+    suppliers:  'Suppliers invited',
+    offers:     'Offers received',
+    bestPrice:  'Best price',
+    savings:    'AI savings',
+    currency:   'SAR',
+    bestVal:    '1.24M',
+    savingsVal: '218K',
+    aiRec:      'AI Recommendation',
+    suppName:   'Delta Steel & Materials',
+    suppSub:    'SAR 1,245,000 · 14-day delivery · Tier 1 Certified',
+    match:      '98% match',
+    acceptBtn:  '✓ Accept Offer',
+    compareBtn: 'Compare 46 offers',
+    liveTitle:  'Live Activity',
+  };
 
   return (
     <div className="bn-ledger" dir="ltr" aria-hidden>
-      {/* Title bar */}
+
+      {/* ── Title bar ─────────────────────────────── */}
       <div className="bn-ledger-bar">
         <span className="bn-dot" /><span className="bn-dot" /><span className="bn-dot" />
         <span className="bn-ledger-name">{L.file}</span>
+        <span className="bn-live-pill">{L.live}</span>
       </div>
 
-      {/* Item header */}
-      <div className="bn-bid-item">
-        <div className="bn-bid-item-name">{L.item}</div>
-        <div className="bn-bid-item-spec">{L.spec}</div>
-        <div className={`bn-bid-status${visibleBids > 0 ? ' is-received' : ''}`}>
-          {visibleBids === 0 ? L.requesting : L.received(visibleBids)}
+      {/* ── Project header ────────────────────────── */}
+      <div className="bn-proj-hdr">
+        <span className="bn-proj-icon" aria-hidden="true">🏗</span>
+        <div className="bn-proj-info">
+          <span className="bn-proj-name">{L.project}</span>
+          <span className="bn-proj-id">{L.projectId}</span>
         </div>
       </div>
 
-      {/* Column headers */}
-      <div className="bn-bid-head">
-        <span className="bn-l-bsup">{L.supplier}</span>
-        <span className="bn-l-bprice">{L.priceUnit}</span>
-        <span className="bn-l-bdel">{L.delivery}</span>
-      </div>
-
-      {/* Bid rows */}
-      {BID_ROWS.map((r, i) => {
-        const isBest    = i === BEST_BID_IDX;
-        const isVisible = i < visibleBids;
-        const highlight = isBest && showBest;
-        return (
-          <div
-            key={r.id}
-            className={`bn-bid-row${isVisible ? ' is-visible' : ''}${highlight ? ' is-best' : ''}`}
-          >
-            <span className="bn-l-bsup">
-              <span className="bn-sup-name">{lang === 'ar' ? r.arName : r.enName}</span>
-              {highlight && <span className="bn-best-badge">{L.bestBadge}</span>}
-            </span>
-            <span className="bn-l-bprice bn-bamt">{isVisible ? formatNumber(r.price) : '—'}</span>
-            <span className="bn-l-bdel">{isVisible ? `${r.days}${L.days}` : '—'}</span>
+      {/* ── Process stepper ───────────────────────── */}
+      <div className="bn-stepper">
+        {steps.map((s, i) => (
+          <div key={i} className={`bn-sstep${i < 4 ? ' is-done' : ' is-active'}`}>
+            <span className="bn-sstep-num">{i < 4 ? '✓' : ''}</span>
+            <span className="bn-sstep-txt">{s}</span>
+            {i < steps.length - 1 && <span className="bn-sstep-arr" aria-hidden="true">→</span>}
           </div>
-        );
-      })}
-
-      {/* Savings footer */}
-      <div className={`bn-bid-savings${showSavings ? ' is-visible' : ''}`}>
-        <span>{L.savingsLbl}</span>
-        <span className="bn-savings-val">{L.currency} {formatNumber(savings)}</span>
+        ))}
       </div>
+
+      {/* ── Metrics row ───────────────────────────── */}
+      <div className="bn-metrics">
+        <div className="bn-metric">
+          <span className="bn-metric-n">127</span>
+          <span className="bn-metric-l">{L.suppliers}</span>
+        </div>
+        <div className="bn-metric">
+          <span className="bn-metric-n">46</span>
+          <span className="bn-metric-l">{L.offers}</span>
+        </div>
+        <div className="bn-metric">
+          <span className="bn-metric-n">{L.currency} {L.bestVal}</span>
+          <span className="bn-metric-l">{L.bestPrice}</span>
+        </div>
+        <div className="bn-metric bn-metric--savings">
+          <span className="bn-metric-n">↓ {L.currency} {L.savingsVal}</span>
+          <span className="bn-metric-l">{L.savings}</span>
+        </div>
+      </div>
+
+      {/* ── AI Recommendation ─────────────────────── */}
+      <div className="bn-ai-rec">
+        <div className="bn-ai-rec-top">
+          <span className="bn-ai-label">{L.aiRec}</span>
+          <span className="bn-ai-score">{L.match}</span>
+        </div>
+        <div className="bn-ai-supp">{L.suppName}</div>
+        <div className="bn-ai-supp-sub">{L.suppSub}</div>
+        <div className="bn-ai-btns">
+          <button className="bn-accept-btn">{L.acceptBtn}</button>
+          <button className="bn-compare-btn">{L.compareBtn}</button>
+        </div>
+      </div>
+
+      {/* ── Live activity feed ────────────────────── */}
+      <div className="bn-live-feed">
+        <span className="bn-live-feed-hdr">{L.liveTitle}</span>
+        {activity.map((a, i) => (
+          <div
+            key={i}
+            className={`bn-act-item${i < visAct ? ' is-vis' : ''}${a.type === 'blue' ? ' is-blue' : a.type === 'green' ? ' is-green' : ''}`}
+          >
+            <span className="bn-act-dot" />
+            <span className="bn-act-txt">{a.txt}</span>
+            <span className="bn-act-time">{a.time}</span>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }
