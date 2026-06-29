@@ -376,9 +376,9 @@ export default function Home() {
 
 /* ---- Logo ---------------------------------------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const size = small ? 26 : 62;
+  const size = small ? 20 : 34;
   return (
-    <span className="bn-logo" dir="ltr">
+    <span className={`bn-logo${small ? ' bn-logo-sm' : ''}`} dir="ltr">
       <svg width={size} height={size} viewBox="0 0 96 96" fill="none" aria-hidden>
         <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
           <path d="M20 38 V23 Q20 20 23 20 H38" fill="none" />

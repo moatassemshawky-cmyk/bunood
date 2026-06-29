@@ -39,8 +39,9 @@
 }
 .bn-header .bn-wrap { max-width: none; margin: 0; padding: 0 48px; }
 .bn-header-in { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-.bn-logo { display: inline-flex; align-items: center; gap: 10px; }
-.bn-word { font-family: var(--display); font-weight: 600; font-size: 36px; letter-spacing: -.01em; color: var(--graphite); }
+.bn-logo { display: inline-flex; align-items: center; gap: 8px; }
+.bn-word { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.01em; color: var(--graphite); }
+.bn-logo-sm .bn-word { font-size: 14px; }
 .bn-nav-ctas { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
 .bn-nav { display: flex; align-items: center; gap: 12px; }
 .bn-navlink { font-family: var(--display); font-weight: 500; font-size: 14.5px; color: var(--graphite); text-decoration: none; }

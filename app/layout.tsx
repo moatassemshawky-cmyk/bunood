@@ -32,11 +32,25 @@ export const metadata: Metadata = {
   title: 'bunood — منصة المشتريات الفورية للمقاولات',
   description:
     'Bunood connects contractors and suppliers for instant procurement and AI-powered BOQ estimation.',
+  icons: {
+    icon: [
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+  },
   openGraph: {
-    title: 'bunood',
+    title: 'bunood — منصة المشتريات الفورية للمقاولات',
     description: 'Instant procurement for construction.',
     locale: 'ar_EG',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1024, height: 1024, alt: 'bunood' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'bunood',
+    description: 'Instant procurement for construction.',
+    images: ['/og-image.png'],
   },
 };
 
