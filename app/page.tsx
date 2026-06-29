@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import './page.css';
 
 /* ------------------------------------------------------------------ */
@@ -207,13 +208,18 @@ const formatNumber = (n: number) => n.toLocaleString('en-US');
 /* ================================================================== */
 
 export default function Home() {
+  const router = useRouter();
   const [lang, setLang] = useState<Lang>('ar');
   const [role, setRole] = useState<Role>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const t = COPY[lang];
 
-  /** Select a role and smoothly scroll to the waitlist form. */
+  /** Select a role — suppliers go straight to registration, others scroll to waitlist. */
   const pickRole = (r: RoleId) => {
+    if (r === 'supplier') {
+      router.push('/register/supplier');
+      return;
+    }
     setRole(r);
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.getElementById('waitlist')?.scrollIntoView({
