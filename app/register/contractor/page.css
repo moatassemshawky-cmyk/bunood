@@ -269,9 +269,9 @@
   border-radius: 50%;
   background: var(--blue);
   box-shadow: 0 0 6px rgba(47,111,224,.7);
-  animation: cr-*pulse 2s ease-in-out infinite;
+  animation: cr-pulse 2s ease-in-out infinite;
 }
-@keyframes cr-*pulse {
+@keyframes cr-pulse {
   0%, 100% { opacity: .35; }
   50%       { opacity: 1; }
 }
@@ -280,16 +280,16 @@
 
 .cr-step-wrap { max-width: 480px; }
 .cr-step-wrap.anim-forward {
-  animation: cr-*fwd .26s cubic-bezier(.2,.7,.2,1) both;
+  animation: cr-fwd .26s cubic-bezier(.2,.7,.2,1) both;
 }
 .cr-step-wrap.anim-back {
-  animation: cr-*bck .26s cubic-bezier(.2,.7,.2,1) both;
+  animation: cr-bck .26s cubic-bezier(.2,.7,.2,1) both;
 }
-@keyframes cr-*fwd {
+@keyframes cr-fwd {
   from { opacity: 0; transform: translateX(24px); }
   to   { opacity: 1; transform: none; }
 }
-@keyframes cr-*bck {
+@keyframes cr-bck {
   from { opacity: 0; transform: translateX(-24px); }
   to   { opacity: 1; transform: none; }
 }
@@ -839,9 +839,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: cr-*pop .38s cubic-bezier(.2,.7,.2,1) both;
+  animation: cr-pop .38s cubic-bezier(.2,.7,.2,1) both;
 }
-@keyframes cr-*pop {
+@keyframes cr-pop {
   from { opacity: 0; transform: scale(.55); }
   to   { opacity: 1; transform: none; }
 }
