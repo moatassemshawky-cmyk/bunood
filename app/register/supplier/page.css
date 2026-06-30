@@ -797,6 +797,17 @@
 
 /* ── Sign-in footer ──────────────────────────────────────────── */
 
+.sr-api-error {
+  margin: 12px 0 0;
+  padding: 11px 14px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.22);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #ef4444;
+  text-align: center;
+}
+
 .sr-signin {
   margin-top: 32px;
   font-size: 13.5px;

@@ -1,0 +1,203 @@
+/* bunood — Supplier Login */
+
+.sl-root {
+  --blue: #2f6fe0;
+  --graphite: #1e2330;
+  --border: #e2e6eb;
+  --mist: #f5f6f8;
+  --body: 'IBM Plex Sans Arabic', 'Readex Pro', system-ui, sans-serif;
+  --display: 'Readex Pro', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  min-height: 100vh;
+  display: flex;
+  background: #fff;
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+.sl-root * { box-sizing: border-box; }
+
+/* ── Brand panel ──────────────────────────────────────────── */
+.sl-brand {
+  width: 340px;
+  flex-shrink: 0;
+  background: var(--graphite);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.sl-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(47,111,224,.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 110%, rgba(47,111,224,.18) 0%, transparent 55%);
+  pointer-events: none;
+}
+.sl-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+.sl-brand-name {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.015em;
+}
+.sl-blue { color: var(--blue); }
+.sl-brand-tagline {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.38);
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Form panel ───────────────────────────────────────────── */
+.sl-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+}
+.sl-form-inner {
+  width: 100%;
+  max-width: 400px;
+}
+.sl-title {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--graphite);
+  letter-spacing: -.02em;
+  margin: 0 0 8px;
+}
+.sl-sub {
+  font-size: 15px;
+  color: #6b7480;
+  margin: 0 0 32px;
+  line-height: 1.55;
+}
+
+/* ── Fields ───────────────────────────────────────────────── */
+.sl-form { display: flex; flex-direction: column; gap: 20px; }
+.sl-field { display: flex; flex-direction: column; gap: 6px; }
+.sl-label {
+  font-family: var(--display);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3a424e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sl-forgot {
+  font-weight: 400;
+  font-size: 12.5px;
+  color: var(--blue);
+  text-decoration: none;
+}
+.sl-forgot:hover { text-decoration: underline; }
+
+.sl-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  font-family: var(--body);
+  font-size: 15px;
+  color: var(--graphite);
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.sl-input::placeholder { color: #b0b8c4; }
+.sl-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(47,111,224,.14);
+}
+.sl-input:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Password field */
+.sl-pw-wrap { position: relative; }
+.sl-pw-wrap .sl-input { padding-right: 44px; }
+.sl-pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9aa3ae;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+.sl-pw-toggle:hover { color: #5a6474; }
+
+/* Error */
+.sl-error {
+  padding: 10px 14px;
+  background: rgba(239,68,68,.07);
+  border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #ef4444;
+  margin: 0;
+}
+
+/* Submit button */
+.sl-btn {
+  width: 100%;
+  height: 50px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px -4px rgba(47,111,224,.40);
+}
+.sl-btn:hover:not(:disabled) { background: #2660cf; transform: translateY(-1px); }
+.sl-btn:active:not(:disabled) { transform: none; }
+.sl-btn:disabled { opacity: .65; cursor: not-allowed; }
+
+/* Register link */
+.sl-register {
+  margin-top: 24px;
+  font-size: 13.5px;
+  color: #8591a0;
+  text-align: center;
+}
+.sl-link {
+  color: var(--blue);
+  text-decoration: none;
+  margin-left: 4px;
+  font-weight: 500;
+}
+.sl-link:hover { text-decoration: underline; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .sl-brand { display: none; }
+  .sl-form-panel { padding: 48px 24px; }
+}

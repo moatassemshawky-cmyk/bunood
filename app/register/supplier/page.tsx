@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -639,6 +640,7 @@ const INIT: FormData = {
 };
 
 export default function SupplierRegisterPage() {
+  const router = useRouter();
   const [step,       setStep]       = useState<Step>(1);
   const [anim,       setAnim]       = useState<Anim>('');
   const [data,       setData]       = useState<FormData>(INIT);
@@ -646,6 +648,7 @@ export default function SupplierRegisterPage() {
   const [touched,    setTouched]    = useState<Touched>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted,  setSubmitted]  = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Re-trigger animation when step changes
   const [animKey, setAnimKey] = useState(0);
@@ -701,10 +704,35 @@ export default function SupplierRegisterPage() {
   const handleSubmit = async () => {
     if (!validateStep(STEP3_FIELDS)) return;
     setSubmitting(true);
-    // TODO: replace with actual API call
-    await new Promise(r => setTimeout(r, 1600));
-    setSubmitting(false);
-    setSubmitted(true);
+    setSubmitError('');
+    try {
+      const res = await fetch('/api/supplier/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName:     data.companyName,
+          contactPerson:   data.contactPerson,
+          mobile:          data.mobile,
+          email:           data.email,
+          password:        data.password,
+          confirmPassword: data.confirmPassword,
+          categories:      data.categories,
+          deliveryAreas:   data.deliveryAreas,
+          termsAccepted:   data.termsAccepted,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setSubmitError(json.error ?? 'Registration failed. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+      // Session cookie is set by the API — redirect to dashboard
+      router.push('/supplier/dashboard');
+    } catch {
+      setSubmitError('Network error. Check your connection and try again.');
+      setSubmitting(false);
+    }
   };
 
   /* ── Success state ─────────────────────────────────────────── */
@@ -773,10 +801,15 @@ export default function SupplierRegisterPage() {
           )}
         </div>
 
+        {/* API-level error (e.g. duplicate email) */}
+        {submitError && (
+          <p className="sr-api-error" role="alert">{submitError}</p>
+        )}
+
         {/* Sign in link */}
         <p className="sr-signin">
           Already have an account?
-          <a href="/login" className="sr-link">Sign In</a>
+          <a href="/supplier/login" className="sr-link">Sign In</a>
         </p>
       </main>
     </div>
