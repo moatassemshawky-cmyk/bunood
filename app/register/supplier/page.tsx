@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -640,7 +640,9 @@ const INIT: FormData = {
 };
 
 export default function SupplierRegisterPage() {
-  const router = useRouter();
+  const router      = useRouter();
+  const searchParams = useSearchParams();
+  const isArabic    = searchParams.get('lang') === 'ar';
   const [step,       setStep]       = useState<Step>(1);
   const [anim,       setAnim]       = useState<Anim>('');
   const [data,       setData]       = useState<FormData>(INIT);
@@ -738,7 +740,7 @@ export default function SupplierRegisterPage() {
   /* ── Success state ─────────────────────────────────────────── */
   if (submitted) {
     return (
-      <div className="sr-root">
+      <div className="sr-root" dir={isArabic ? 'rtl' : 'ltr'} lang={isArabic ? 'ar' : 'en'}>
         <BrandPanel />
         <main className="sr-form-panel">
           <div className="sr-success">
@@ -769,7 +771,7 @@ export default function SupplierRegisterPage() {
   const animClass = anim ? `anim-${anim}` : '';
 
   return (
-    <div className="sr-root">
+    <div className="sr-root" dir={isArabic ? 'rtl' : 'ltr'} lang={isArabic ? 'ar' : 'en'}>
       <BrandPanel />
 
       <main className="sr-form-panel">

@@ -229,7 +229,7 @@ export default function Home() {
   /** Select a role — suppliers go straight to registration, others scroll to waitlist. */
   const pickRole = (r: RoleId) => {
     if (r === 'supplier') {
-      router.push('/register/supplier');
+      router.push(`/register/supplier${lang === 'ar' ? '?lang=ar' : ''}`);
       return;
     }
     setRole(r);
@@ -295,7 +295,7 @@ export default function Home() {
           <Logo />
           <div className="bn-nav-ctas">
             <button onClick={openModal} className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</button>
-            <a href="#waitlist" className="bn-btn bn-btn-sm">{t.nav.login}</a>
+            <a href="/supplier/login" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </div>
           <nav className="bn-nav" aria-label="Main navigation">
             <a href="#how" className="bn-navlink">{t.nav.whatWeDo}</a>

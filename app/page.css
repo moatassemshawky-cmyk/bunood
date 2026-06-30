@@ -70,8 +70,10 @@
 /* Base — hero-bg.jpg visible with dark overlay + blue glow stack */
 .bn-hero {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
+  max-height: 100vh;
+  max-height: 100svh;
   background: url('/hero-bg.jpg') center / cover no-repeat #0f1117;
   overflow: hidden;
   display: flex;
@@ -106,8 +108,8 @@
   display: grid;
   grid-template-columns: 50fr 50fr;
   align-items: center;
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
 }
 
 /* RTL (Arabic): swap columns — ledger right, copy left */
