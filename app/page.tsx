@@ -47,17 +47,23 @@ const COPY = {
       login: 'تسجيل الدخول',
     },
     hero: {
-      eyebrow: 'منصة مشتريات بالذكاء الاصطناعي',
-      title: ['منصة مشتريات ذكية ', 'تبني مشاريع أفضل.', ''],
-      sub: 'نوفّر لك كل ما تحتاجه لشراء مواد البناء والخدمات بكفاءة وشفافية — مقارنات ذكية، عروض تنافسية، وقرارات توفّر الوقت والمال.',
-      ctaPrimary: 'ابدأ مشروعك الآن',
+      eyebrow: 'نظام مشتريات البناء',
+      title: ['من المقايسة للعروض —', 'في دقائق، لا أسابيع.', ''],
+      sub: 'بنود يقرأ أي مقايسة، يصنّف كل بند تلقائياً، ويرسل طلبات التوريد لموردين معتمدين. قارن العروض جنباً لجنب واتخذ قرارك في الحال.',
+      ctaPrimary: 'ابدأ مجاناً',
       ctaSecondary: 'شاهد كيف يعمل',
-      proof: 'انضم إلى مئات الشركات التي تبني مستقبلها مع bunood',
+      proof: '٥٠٠+ مورّد · توفير ١٥٪ · ٢,٤٠٠+ طلب مكتمل',
+      stats: [
+        { val: '500+',  lbl: 'مورّد معتمد' },
+        { val: '15%',   lbl: 'متوسط التوفير' },
+        { val: '< 48س', lbl: 'وقت الرد' },
+        { val: '2,400', lbl: 'طلب مكتمل' },
+      ],
       features: [
-        { icon: 'award' as const, title: 'عروض تنافسية',  desc: 'احصل على أفضل الأسعار من موردين موثوقين.' },
-        { icon: 'clock' as const, title: 'توفير الوقت',   desc: 'أتمتة عملية المشتريات من الطلب حتى الترسية.' },
-        { icon: 'shield' as const, title: 'شفافية كاملة', desc: 'مقارنة عادلة وبيانات واضحة لأفضل القرارات.' },
-        { icon: 'chart' as const, title: 'تقارير ذكية',  desc: 'تحليلات دقيقة لمساعدتك في خفض التكاليف.' },
+        { icon: 'upload' as const, title: 'ارفع المقايسة',  desc: 'PDF أو Excel أو صورة هاتف.' },
+        { icon: 'zap'    as const, title: 'تصنيف ذكي',     desc: 'كل بند يُصنَّف تلقائياً في ثوانٍ.' },
+        { icon: 'award'  as const, title: 'عروض حقيقية',   desc: 'من موردين معتمدين ومتنافسين.' },
+        { icon: 'chart'  as const, title: 'مقارنة فورية',  desc: 'اختر الأفضل سعراً بنقرة واحدة.' },
       ],
     },
     strip: ['وداعًا لأسابيع الإكسيل.', 'أسعار حقيقية، حي بحي — مش متوسطات.', 'الموردين في إيدك، قارن العروض في دقايق.'],
@@ -119,17 +125,23 @@ const COPY = {
       login: 'Login',
     },
     hero: {
-      eyebrow: 'AI Procurement Platform',
-      title: ['Smart Procurement, ', 'Better Projects.', ''],
-      sub: 'Everything you need to procure construction materials and services efficiently and transparently — smart comparisons, competitive bids, decisions that save time and money.',
-      ctaPrimary: 'Start your project',
+      eyebrow: 'Construction Procurement OS',
+      title: ['From BOQ to quotes.', 'In minutes, not weeks.', ''],
+      sub: 'Upload any BOQ format. Bunood classifies every line and dispatches RFQs to verified suppliers automatically. Compare real bids side-by-side and award instantly.',
+      ctaPrimary: 'Start free',
       ctaSecondary: 'See how it works',
-      proof: 'Join hundreds of companies building their future with bunood',
+      proof: '500+ suppliers · 15% avg savings · 2,400+ RFQs completed',
+      stats: [
+        { val: '500+',   lbl: 'Verified suppliers' },
+        { val: '15%',    lbl: 'Avg. savings' },
+        { val: '< 48h',  lbl: 'Quote response' },
+        { val: '2,400+', lbl: 'RFQs completed' },
+      ],
       features: [
-        { icon: 'award' as const, title: 'Competitive Bids',   desc: 'Get the best prices from verified suppliers.' },
-        { icon: 'clock' as const, title: 'Save Time',          desc: 'Automate procurement from request to award.' },
-        { icon: 'shield' as const, title: 'Full Transparency', desc: 'Fair comparisons and clear data for better decisions.' },
-        { icon: 'chart' as const, title: 'Smart Reports',      desc: 'Detailed analytics to help you cut costs.' },
+        { icon: 'upload' as const, title: 'Upload BOQ',       desc: 'PDF, Excel, or a phone photo.' },
+        { icon: 'zap'    as const, title: 'AI Classify',      desc: 'Every line tagged in seconds.' },
+        { icon: 'award'  as const, title: 'Real Quotes',      desc: 'From verified, competing suppliers.' },
+        { icon: 'chart'  as const, title: 'Compare & Award',  desc: 'Pick the best offer in one click.' },
       ],
     },
     strip: ['Goodbye, weeks in Excel.', 'Real rates, street by street — not averages.', 'Suppliers at hand — compare quotes in minutes.'],
@@ -312,6 +324,18 @@ export default function Home() {
               {t.hero.title[0]}<span className="bn-accent">{t.hero.title[1]}</span><span className="bn-h1-trail">{t.hero.title[2]}</span>
             </h1>
             <p className="bn-hero-lede">{t.hero.sub}</p>
+            <div className="bn-hero-cta">
+              <a href="#waitlist" className="bn-btn bn-btn-hero">{t.hero.ctaPrimary}</a>
+              <a href="#roles" className="bn-btn bn-btn-ghost">{t.hero.ctaSecondary}</a>
+            </div>
+            <div className="bn-hero-stats">
+              {t.hero.stats.map(s => (
+                <div className="bn-stat-item" key={s.lbl}>
+                  <span className="bn-stat-val">{s.val}</span>
+                  <span className="bn-stat-lbl">{s.lbl}</span>
+                </div>
+              ))}
+            </div>
             <div className="bn-hero-features">
               {t.hero.features.map(f => (
                 <div className="bn-feat-item" key={f.title}>
@@ -323,11 +347,6 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="bn-hero-cta">
-              <a href="#waitlist" className="bn-btn">{t.hero.ctaPrimary}</a>
-              <a href="#roles" className="bn-btn bn-btn-ghost">{t.hero.ctaSecondary}</a>
-            </div>
-            <p className="bn-hero-proof">{t.hero.proof}</p>
           </div>
 
         </div>
@@ -458,14 +477,14 @@ function RoleIcon({ id }: { id: RoleId }) {
 }
 
 /* ---- Hero feature icons -------------------------------------------- */
-function HeroIcon({ icon }: { icon: 'award' | 'clock' | 'shield' | 'chart' }) {
+function HeroIcon({ icon }: { icon: 'upload' | 'zap' | 'award' | 'chart' }) {
   const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-      {icon === 'award' && (<><circle {...p} cx="12" cy="8" r="6"/><path {...p} d="M8.2 14.3 7 22l5-3 5 3-1.2-7.7"/></>)}
-      {icon === 'clock' && (<><circle {...p} cx="12" cy="12" r="9"/><path {...p} d="M12 7v5l3 3"/></>)}
-      {icon === 'shield' && (<><path {...p} d="M12 3 3 7v6c0 4.5 3.9 8.2 9 9 5.1-.8 9-4.5 9-9V7z"/><path {...p} d="M9 12l2 2 4-4"/></>)}
-      {icon === 'chart' && (<><path {...p} d="M3 3v18h18"/><path {...p} d="m7 16 4-6 4 4 4-7"/></>)}
+      {icon === 'upload' && (<><path {...p} d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline {...p} points="17 8 12 3 7 8"/><line {...p} x1="12" y1="3" x2="12" y2="15"/></>)}
+      {icon === 'zap'    && (<polygon {...p} points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>)}
+      {icon === 'award'  && (<><circle {...p} cx="12" cy="8" r="6"/><path {...p} d="M8.2 14.3 7 22l5-3 5 3-1.2-7.7"/></>)}
+      {icon === 'chart'  && (<><path {...p} d="M3 3v18h18"/><path {...p} d="m7 16 4-6 4 4 4-7"/></>)}
     </svg>
   );
 }
