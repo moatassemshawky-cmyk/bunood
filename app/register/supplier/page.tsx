@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import './page.css';
 
@@ -639,7 +639,7 @@ const INIT: FormData = {
   termsAccepted: false,
 };
 
-export default function SupplierRegisterPage() {
+function SupplierRegisterPageInner() {
   const router      = useRouter();
   const searchParams = useSearchParams();
   const isArabic    = searchParams.get('lang') === 'ar';
@@ -815,5 +815,13 @@ export default function SupplierRegisterPage() {
         </p>
       </main>
     </div>
+  );
+}
+
+export default function SupplierRegisterPage() {
+  return (
+    <Suspense>
+      <SupplierRegisterPageInner />
+    </Suspense>
   );
 }
