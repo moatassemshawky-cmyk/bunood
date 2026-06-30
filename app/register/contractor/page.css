@@ -886,7 +886,8 @@
   .ps-connector{ width: 28px; margin: 0 4px; }
   .cr-step-wrap { max-width: 100%; }
   .cr-btn-row   { flex-direction: column-reverse; }
-  .cr-btn-row .cr-btn-ghost  { width: 100%
+  .cr-btn-row .cr-btn-ghost  { width: 100%; }
+}
 /* ── Contractor-specific: work type grid ───────────────────── */
 .cr-work-grid {
   display: grid;
@@ -923,5 +924,5 @@
 [dir="rtl"] .cr-work-check { right: auto; left: 10px; }
 
 @media (max-width: 768px) {
-  .cr-work-grid { grid-template-columns: 1fr; }
+  .cr-work-grid { grid-template-columns: 1fr;; }
 }
