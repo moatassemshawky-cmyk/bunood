@@ -951,15 +951,25 @@ function SupplierRegisterPageInner() {
         <div className="sr-hero">
           <h1 className="sr-page-title">{t.pageTitle}</h1>
           <p className="sr-page-sub">{t.pageSub}</p>
-          <span className="sr-step-badge">{t.stepBadge(step)}</span>
+          <span className="sr-step-count">{t.stepOf(step + 1, TOTAL_STEPS)}</span>
         </div>
-        <div key={animKey} className={`sr-step-wrap ${animClass}`}>
-          {step === 1 && <Step1 {...stepProps} />}
-          {step === 2 && <Step2 {...stepProps} onBack={goBack} isArabic={isArabic} />}
-          {step === 3 && (
-            <Step3 data={data} errors={errors} touched={touched}
-              onChange={updateField} onBack={goBack}
-              onSubmit={handleSubmit} submitting={submitting}
+        <div className={`sr-step-wrap ${animClass}`}>
+          {step === 0 && <Step1 {...stepProps} />}
+          {step === 1 && <Step2 {...stepProps} />}
+          {step === 2 && <Step3 {...stepProps} />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function SupplierRegisterPage() {
+  return (
+    <Suspense>
+      <SupplierRegisterPageInner />
+    </Suspense>
+  );
+}
               t={t} isArabic={isArabic} />
           )}
         </div>

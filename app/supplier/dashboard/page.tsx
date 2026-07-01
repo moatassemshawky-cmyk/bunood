@@ -173,7 +173,7 @@ export default async function SupplierDashboard() {
           </p>
           <div className="sd-empty-cats">
             <span className="sd-empty-cats-label">Your categories:</span>
-            {supplier.categories.map(c => (
+                   {supplier.categories.map(c => (
               <span key={c} className="sd-cat-chip">{c}</span>
             ))}
           </div>
