@@ -937,7 +937,17 @@ function SupplierRegisterPageInner() {
     );
   }
 
-  const stepProps = { data, errors, touched, onChange: updateField, onBlur: touchField, onNext: goNext, t };
+  const stepProps = {
+    data,
+    errors,
+    touched,
+    onChange: updateField,
+    onBlur: touchField,
+    onNext: goNext,
+    t,
+  };
+  const step2Props = { ...stepProps, onBack: goBack, isArabic };
+  const step3Props = { ...stepProps, onBack: goBack, onSubmit: handleSubmit, submitting, isArabic };
   const animClass = anim ? `anim-${anim}` : '';
 
   return (
@@ -955,8 +965,8 @@ function SupplierRegisterPageInner() {
         </div>
         <div className={`sr-step-wrap ${animClass}`}>
           {step === 1 && <Step1 {...stepProps} />}
-          {step === 2 && <Step2 {...stepProps} />}
-          {step === 3 && <Step3 {...stepProps} />}
+          {step === 2 && <Step2 {...step2Props} />}
+          {step === 3 && <Step3 {...step3Props} />}
         </div>
       </main>
     </div>
