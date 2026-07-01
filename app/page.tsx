@@ -428,7 +428,7 @@ export default function Home() {
 
 /* ---- Logo ---------------------------------------------------------- */
 function Logo({ small }: { small?: boolean }) {
-  const size = small ? 20 : 34;
+  const size = small ? 20 : 42;
   return (
     <span className={`bn-logo${small ? ' bn-logo-sm' : ''}`} dir="ltr">
       <svg width={size} height={size} viewBox="0 0 96 96" fill="none" aria-hidden>
