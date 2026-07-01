@@ -107,7 +107,7 @@
   position: relative; z-index: 1;
   width: 100%;
   display: grid;
-  grid-template-columns: 50fr 50fr;
+  grid-template-columns: 56fr 44fr;
   align-items: center;
   /* let the parent hero control height; avoid duplicate full-viewport constraints */
   min-height: 100%;
@@ -120,7 +120,7 @@
 /* Ledger column — pushed toward the centre gap so it visually connects with copy */
 .bn-hero-ledger-col {
   /* reduce vertical padding so ledger doesn't push the hero taller */
-  padding: clamp(20px, 4.5vh, 48px) clamp(12px, 1.5vw, 28px);
+  padding: clamp(20px, 4.5vh, 48px) clamp(16px, 2vw, 32px);
   display: flex; align-items: center; justify-content: flex-end;
 }
 
@@ -283,7 +283,7 @@
 /* ---- Ledger — Dark Glass (hero only) ----------------------------- */
 /* More opaque, less blurry = sharper, feels like a real product UI */
 .bn-hero .bn-ledger {
-  width: 100%; max-width: 560px; overflow: hidden;
+  width: 100%; max-width: 720px; overflow: hidden;
   background: rgba(14, 18, 28, 0.92);
   backdrop-filter: blur(18px) saturate(1.8);
   -webkit-backdrop-filter: blur(18px) saturate(1.8);
@@ -622,7 +622,7 @@
 
 /* Large desktop: bigger ledger card */
 @media (min-width: 1440px) {
-  .bn-hero .bn-ledger { max-width: 580px; }
+  .bn-hero .bn-ledger { max-width: 800px; }
 }
 
 /* Tablet / small laptop (≤ 1024px): stack hero vertically */
