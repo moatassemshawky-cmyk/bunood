@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     if (pg.code === '23505')
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
     console.error('Contractor register error:', err);
-    return NextResponse.json({ error: 'Server error. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong on our end. Please try again in a moment.' }, { status: 500 });
   } finally {
     await client.end();
   }
