@@ -821,7 +821,7 @@ function SupplierRegisterPageInner() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const isArabic     = searchParams.get('lang') === 'ar';
-  const t            = isArabic ? T.ar : T.en;
+  const t            = (isArabic ? T.ar : T.en) as unknown as Translations;
   const dir          = isArabic ? 'rtl' : 'ltr';
 
   const [step,        setStep]       = useState<Step>(1);
