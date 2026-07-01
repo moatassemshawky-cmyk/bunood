@@ -613,10 +613,17 @@
   }
   .bn-hero-ledger-col,
   .bn-hero-stage.is-rtl .bn-hero-ledger-col {
-    padding: 0 clamp(24px, 6vw, 64px) 72px;
+    padding: 24px clamp(24px, 6vw, 64px) 48px;
     justify-content: center;
   }
   .bn-hero .bn-ledger { max-width: 100%; }
+
+  /* Make ledger more compact and centered on tablet */
+  .bn-hero .bn-ledger {
+    margin: 0 auto;
+    width: min(720px, 96%);
+    padding: 12px 12px 10px 12px;
+  }
 }
 
 /* Small tablet (≤ 900px): tighten other sections */
@@ -625,6 +632,10 @@
   .bn-roles { grid-template-columns: 1fr; }
   .bn-feats { grid-template-columns: 1fr; }
   .bn-section { padding: 60px 0; }
+  
+  /* Slightly larger metrics for small laptops */
+  .bn-hero .bn-metric-n { font-size: 15px; }
+  .bn-act-txt { font-size: 12px; }
 }
 
 /* Mobile (≤ 520px) */
@@ -645,4 +656,16 @@
   .bn-stat-item:nth-last-child(-n+2) { border-bottom: none; }
   /* Slightly smaller hero btn */
   .bn-btn-hero { padding: 13px 24px; font-size: 15px; }
+
+  /* Mobile: full-bleed ledger with comfortable padding */
+  .bn-hero .bn-ledger {
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px 12px 12px;
+    border-radius: 12px;
+  }
+
+  .bn-hero .bn-metric-n { font-size: 14px; }
+  .bn-act-txt { font-size: 12px; }
+  .bn-ai-supp { font-size: 13px; }
 }
