@@ -85,11 +85,15 @@ export async function POST(request: Request) {
     return response;
 
   } catch (err: unknown) {
-    const pg = err as { code?: string };
+    const pg = err as { code?: string; message?: string; name?: string; stack?: string; detail?: string };
     if (pg.code === '23505')
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
     console.error('Engineer register error:', err);
-    return NextResponse.json({ error: 'Server error. Please try again.' }, { status: 500 });
+    // TEMPORARY diagnostic detail — will be removed once the root cause is confirmed.
+    return NextResponse.json({
+      error: 'Server error. Please try again.',
+      _diag: { message: pg.message, name: pg.name, code: pg.code, detail: pg.detail, stack: pg.stack },
+    }, { status: 500 });
   } finally {
     await client.end();
   }
