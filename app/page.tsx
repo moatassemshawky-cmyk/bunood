@@ -10,10 +10,7 @@ import './page.css';
 /* ------------------------------------------------------------------ */
 
 type Lang = 'ar' | 'en';
-/** Non-nullable role identifier */
 type RoleId = 'engineer' | 'contractor' | 'supplier';
-/** Nullable role — null means "not yet chosen" */
-type Role = RoleId | null;
 
 /* ---- Shared types -------------------------------------------------- */
 const ROLE_LABEL: Record<Lang, Record<RoleId, string>> = {
@@ -113,7 +110,6 @@ const COPY = {
       success: 'تمام، اسمك في القائمة. هنتواصل معاك قريب.',
       errBad: 'اكتب بريد إلكتروني صحيح.',
       errFail: 'حصل خطأ. جرّب تاني.',
-      asTag: 'بتسجّل كـ',
     },
     footer: { tag: 'بنود — منصة المشتريات الفورية للمقاولات.', rights: 'كل الحقوق محفوظة.' },
   },
@@ -191,7 +187,6 @@ const COPY = {
       success: "You're on the list. We'll reach out soon.",
       errBad: 'Enter a valid email address.',
       errFail: 'Something went wrong. Try again.',
-      asTag: 'Joining as',
     },
     footer: { tag: 'Bunood — instant procurement for construction.', rights: 'All rights reserved.' },
   },
@@ -217,24 +212,21 @@ const ACTIVITY_DATA = {
 
 /* ================================================================== */
 
+const ROLE_ROUTES: Record<RoleId, string> = {
+  supplier:   '/register/supplier',
+  engineer:   '/register/engineer',
+  contractor: '/register/contractor',
+};
+
 export default function Home() {
   const router = useRouter();
   const [lang, setLang] = useState<Lang>('ar');
-  const [role, setRole] = useState<Role>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const t = COPY[lang];
 
-  /** Select a role — suppliers go straight to registration, others scroll to waitlist. */
+  /** Select a role — navigate straight to that role's registration page. */
   const pickRole = (r: RoleId) => {
-    if (r === 'supplier') {
-      router.push(`/register/supplier${lang === 'ar' ? '?lang=ar' : ''}`);
-      return;
-    }
-    setRole(r);
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.getElementById('waitlist')?.scrollIntoView({
-      behavior: prefersReduced ? 'auto' : 'smooth',
-    });
+    router.push(`${ROLE_ROUTES[r]}${lang === 'ar' ? '?lang=ar' : ''}`);
   };
 
   const openModal  = () => setShowRoleModal(true);
@@ -385,9 +377,8 @@ export default function Home() {
             {t.roles.items.map(r => (
               <button
                 key={r.id}
-                className={`bn-role ${role === r.id ? 'is-on' : ''}`}
+                className="bn-role"
                 onClick={() => pickRole(r.id)}
-                aria-pressed={role === r.id}
               >
                 <RoleIcon id={r.id} />
                 <h3 className="bn-role-t">{r.t}</h3>
@@ -419,7 +410,7 @@ export default function Home() {
         <div className="bn-wrap bn-cta-in">
           <h2 id="cta-heading" className="bn-h2">{t.cta.title}</h2>
           <p className="bn-lede bn-cta-sub">{t.cta.sub}</p>
-          <WaitlistForm lang={lang} role={role} />
+          <WaitlistForm lang={lang} />
         </div>
       </section>
 
@@ -646,7 +637,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type FormStatus = 'idle' | 'loading' | 'ok' | 'err';
 
-function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
+function WaitlistForm({ lang }: { lang: Lang }) {
   const c = COPY[lang].form;
   const [email, setEmail]   = useState('');
   const [wa, setWa]         = useState('');
@@ -664,7 +655,7 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, whatsapp: wa, role, lang }),
+        body: JSON.stringify({ email, whatsapp: wa, lang }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -686,7 +677,6 @@ function WaitlistForm({ lang, role }: { lang: Lang; role: Role }) {
 
   return (
     <div className="bn-form">
-      {role && <span className="bn-role-tag">{c.asTag} {ROLE_LABEL[lang][role]}</span>}
       <div className="bn-form-fields">
         <input
           className="bn-input"
