@@ -71,10 +71,11 @@
 /* Base — hero-bg.jpg visible with dark overlay + blue glow stack */
 .bn-hero {
   position: relative;
-  /* Keep hero inside the first viewport: prefer slightly shorter than full viewport */
-  height: min(95svh, calc(100svh - var(--header-h)));
+  /* Keep hero inside the first viewport: prefer slightly shorter than full viewport.
+     min-height (not height) so taller content grows the box instead of being clipped. */
+  min-height: min(95svh, calc(100svh - var(--header-h)));
   background: url('/hero-bg.jpg') right center / 85% auto no-repeat #0f1117;
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   align-items: stretch;
 }
@@ -109,8 +110,7 @@
   grid-template-columns: 50fr 50fr;
   align-items: center;
   /* let the parent hero control height; avoid duplicate full-viewport constraints */
-  min-height: 0;
-  height: 100%;
+  min-height: 100%;
 }
 
 /* RTL (Arabic): swap columns — ledger right, copy left */

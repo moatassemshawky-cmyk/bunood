@@ -888,8 +888,8 @@
   .sr-step-wrap { max-width: 100%; }
   .sr-btn-row   { flex-direction: column-reverse; }
   .sr-btn-row .sr-btn-ghost  { width: 100%; }
+  .sr-btn-row .sr-btn-primary{ width: 100%; }
 }
-.sr-btn-row .sr-btn-primary{ width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .sr-step-wrap.anim-forward,
   .sr-step-wrap.anim-back { animation: none; }
