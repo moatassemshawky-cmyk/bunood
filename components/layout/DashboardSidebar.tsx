@@ -2,15 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { DASHBOARD_NAV } from './dashboardNav';
+import { DASHBOARD_NAV, type NavItem } from './dashboardNav';
 import { DashboardIcon } from './DashboardIcon';
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  navItems?: NavItem[];
+  homeHref?: string;
+}
+
+export function DashboardSidebar({ navItems = DASHBOARD_NAV, homeHref = '/overview' }: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside className="ds-sidebar">
-      <Link href="/overview" className="ds-sidebar-logo">
+      <Link href={homeHref} className="ds-sidebar-logo">
         <svg width="28" height="28" viewBox="0 0 96 96" fill="none">
           <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
             <path d="M20 38 V23 Q20 20 23 20 H38" fill="none" />
@@ -26,7 +31,7 @@ export function DashboardSidebar() {
       </Link>
 
       <nav className="ds-nav">
-        {DASHBOARD_NAV.map(item => (
+        {navItems.map(item => (
           <Link
             key={item.href}
             href={item.href}

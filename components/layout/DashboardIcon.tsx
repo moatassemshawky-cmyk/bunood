@@ -1,7 +1,8 @@
 export type DashboardIconName =
   | 'overview' | 'projects' | 'purchase' | 'compare' | 'suppliers'
   | 'engineers' | 'contractors' | 'bell' | 'messages' | 'reports'
-  | 'settings' | 'profile' | 'logout' | 'search' | 'plus' | 'download';
+  | 'settings' | 'profile' | 'logout' | 'search' | 'plus' | 'download'
+  | 'boq' | 'chevron' | 'duplicate' | 'archive' | 'close' | 'building';
 
 const common = {
   fill: 'none',
@@ -63,6 +64,24 @@ export function DashboardIcon({ name, size = 18 }: { name: DashboardIconName; si
       )}
       {name === 'download' && (
         <><path {...common} d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline {...common} points="7 10 12 15 17 10" /><line {...common} x1="12" y1="15" x2="12" y2="3" /></>
+      )}
+      {name === 'boq' && (
+        <><path {...common} d="M6 3h9l3 3v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" /><path {...common} d="M9 9h6" /><path {...common} d="M9 13h6" /><path {...common} d="M9 17h4" /></>
+      )}
+      {name === 'chevron' && (
+        <polyline {...common} points="9 6 15 12 9 18" />
+      )}
+      {name === 'duplicate' && (
+        <><rect {...common} x="9" y="9" width="12" height="12" rx="2" /><path {...common} d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" /></>
+      )}
+      {name === 'archive' && (
+        <><rect {...common} x="3" y="4" width="18" height="4" rx="1" /><path {...common} d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" /><path {...common} d="M10 13h4" /></>
+      )}
+      {name === 'close' && (
+        <><line {...common} x1="6" y1="6" x2="18" y2="18" /><line {...common} x1="18" y1="6" x2="6" y2="18" /></>
+      )}
+      {name === 'building' && (
+        <><rect {...common} x="4" y="3" width="16" height="18" rx="1" /><path {...common} d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1" /></>
       )}
     </svg>
   );
