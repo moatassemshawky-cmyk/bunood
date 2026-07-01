@@ -951,12 +951,12 @@ function SupplierRegisterPageInner() {
         <div className="sr-hero">
           <h1 className="sr-page-title">{t.pageTitle}</h1>
           <p className="sr-page-sub">{t.pageSub}</p>
-          <span className="sr-step-count">{t.stepBadge(step + 1)}</span>
+          <span className="sr-step-count">{t.stepBadge(step)}</span>
         </div>
         <div className={`sr-step-wrap ${animClass}`}>
-          {step === 0 && <Step1 {...stepProps} />}
-          {step === 1 && <Step2 {...stepProps} />}
-          {step === 2 && <Step3 {...stepProps} />}
+          {step === 1 && <Step1 {...stepProps} />}
+          {step === 2 && <Step2 {...stepProps} />}
+          {step === 3 && <Step3 {...stepProps} />}
         </div>
       </main>
     </div>
