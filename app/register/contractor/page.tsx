@@ -2,7 +2,12 @@
 
 import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { FormField } from '../../../components/forms/FormField';
+import { PasswordField } from '../../../components/forms/PasswordField';
+import { MultiSelectGrid } from '../../../components/forms/MultiSelectGrid';
+import { StepProgress } from '../../../components/forms/StepProgress';
+import { ReviewRow } from '../../../components/forms/ReviewRow';
+import { AuthBrandPanel } from '../../../components/layout/AuthBrandPanel';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -11,20 +16,22 @@ import './page.css';
 
 type Step = 1 | 2 | 3;
 type Anim = 'forward' | 'back' | '';
-type StrScore = 0 | 1 | 2 | 3 | 4;
 
 interface FormData {
-  companyName:     string;
-  contactPerson:   string;
-  mobile:          string;
-  email:           string;
-  password:        string;
-  confirmPassword: string;
-  workTypes:       string[];
-  companySize:     string;
-  crNumber:        string;
-  city:            string;
-  termsAccepted:   boolean;
+  companyName:      string;
+  contactPerson:    string;
+  mobile:           string;
+  email:            string;
+  password:         string;
+  confirmPassword:  string;
+  workTypes:        string[];
+  companySize:      string;
+  crNumber:         string;
+  taxNumber:        string;
+  countriesServed:  string[];
+  yearsInBusiness:  string;
+  city:             string;
+  termsAccepted:    boolean;
 }
 type FieldKey    = keyof FormData;
 type FieldVal    = string | boolean | string[];
@@ -60,6 +67,20 @@ const COMPANY_SIZES = [
   { id: '200+',   en: 'More than 200',       ar: 'أكثر من 200' },
 ];
 
+const COUNTRIES = [
+  { id: 'EG', en: 'Egypt',                ar: 'مصر' },
+  { id: 'SA', en: 'Saudi Arabia',         ar: 'السعودية' },
+  { id: 'AE', en: 'United Arab Emirates', ar: 'الإمارات العربية المتحدة' },
+];
+
+const YEARS_IN_BUSINESS_OPTS = [
+  { id: '0-2',   en: 'Less than 2 years',  ar: 'أقل من سنتين' },
+  { id: '2-5',   en: '2 – 5 years',        ar: '2 – 5 سنوات' },
+  { id: '5-10',  en: '5 – 10 years',       ar: '5 – 10 سنوات' },
+  { id: '10-15', en: '10 – 15 years',      ar: '10 – 15 سنة' },
+  { id: '15+',   en: 'More than 15 years', ar: 'أكثر من 15 سنة' },
+];
+
 const KSA_CITIES = [
   'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar',
   'Dhahran', 'Jubail', 'Tabuk', 'Abha', 'Hail', 'Najran',
@@ -76,22 +97,26 @@ const STEP3_FIELDS: FieldKey[] = ['termsAccepted'];
 
 const T = {
   en: {
-    brand: { title: 'Bunood for Contractors', sub: 'Streamline your procurement. Get matched with verified suppliers across Saudi Arabia.' },
+    brand: { title: 'Bunood for Contractors', sub: 'Streamline your procurement. Get matched with verified suppliers across the region.' },
     steps: ['Company Info', 'Work Details', 'Confirm'],
     nav: { back: 'Back', next: 'Next', submit: 'Create Account', login: 'Sign in' },
     labels: {
       companyName: 'Company Name', contactPerson: 'Contact Person',
       mobile: 'Mobile Number', email: 'Email Address',
       password: 'Password', confirmPassword: 'Confirm Password',
-      workTypes: 'Type of Work (select all that apply)',
+      workTypes: 'Main Activity (select all that apply)',
       companySize: 'Company Size', crNumber: 'Commercial Registration No. (CR)',
-      city: 'City',
+      taxNumber: 'Tax Number (Optional)', countriesServed: 'Countries Served',
+      yearsInBusiness: 'Years in Business', city: 'City',
+      crUpload: 'Upload Commercial Registration (Optional)',
+      logoUpload: 'Upload Company Logo (Optional)',
     },
     placeholders: {
       companyName: 'Al-Rashidi Construction Co.', contactPerson: 'Mohammed Al-Otaibi',
-      mobile: '+966 5X XXX XXXX', email: 'info@company.com',
+      mobile: '+20 1X XXX XXXX', email: 'info@company.com',
       password: 'Min. 8 characters', confirmPassword: 'Re-enter password',
-      crNumber: 'Optional — CR number',
+      crNumber: 'Optional — CR number', taxNumber: 'Optional — tax registration number',
+      uploadCr: 'Choose a file (PDF, JPG, PNG)', uploadLogo: 'Choose an image (JPG, PNG, SVG)',
     },
     terms: 'I agree to the Terms of Service and Privacy Policy',
     loginPrompt: 'Already have an account?',
@@ -100,31 +125,38 @@ const T = {
       'Get competitive quotes from verified suppliers instantly',
       'Manage all procurement in one platform — BOQ to delivery',
     ],
+    tags: ['🏗 Construction', '🌍 Middle East', '⚡ Procurement'],
     stepTitle: ['Company Information', 'Work & Operations', 'Review & Confirm'],
     stepSub: ['Set up your contractor account', 'Tell us what you build', 'Almost there'],
+    verificationLabel: 'Verification',
     selectSize: 'Select company size',
     selectCity: 'Select city',
+    selectYears: 'Select years in business',
     selectWorkTypes: 'Select at least one work type',
     success: 'Account created! Redirecting…',
     pwStrength: ['', 'Weak', 'Fair', 'Good', 'Strong'],
   },
   ar: {
-    brand: { title: 'بنود للمقاولين', sub: 'بسّط عمليات المشتريات. تواصل مع الموردين المعتمدين في جميع أنحاء المملكة العربية السعودية.' },
+    brand: { title: 'بنود للمقاولين', sub: 'بسّط عمليات المشتريات. تواصل مع الموردين المعتمدين في المنطقة.' },
     steps: ['معلومات الشركة', 'تفاصيل العمل', 'التأكيد'],
     nav: { back: 'رجوع', next: 'التالي', submit: 'إنشاء الحساب', login: 'تسجيل الدخول' },
     labels: {
       companyName: 'اسم الشركة', contactPerson: 'الشخص المسؤول',
       mobile: 'رقم الجوال', email: 'البريد الإلكتروني',
       password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
-      workTypes: 'نوع الأعمال (اختر كل ما ينطبق)',
+      workTypes: 'النشاط الرئيسي (اختر كل ما ينطبق)',
       companySize: 'حجم الشركة', crNumber: 'رقم السجل التجاري',
-      city: 'المدينة',
+      taxNumber: 'الرقم الضريبي (اختياري)', countriesServed: 'الدول التي تخدمها',
+      yearsInBusiness: 'سنوات العمل', city: 'المدينة',
+      crUpload: 'رفع السجل التجاري (اختياري)',
+      logoUpload: 'رفع شعار الشركة (اختياري)',
     },
     placeholders: {
       companyName: 'شركة الرشيدي للإنشاءات', contactPerson: 'محمد العتيبي',
-      mobile: '+966 5X XXX XXXX', email: 'info@company.com',
+      mobile: '+20 1X XXX XXXX', email: 'info@company.com',
       password: '٨ أحرف على الأقل', confirmPassword: 'أعد إدخال كلمة المرور',
-      crNumber: 'اختياري — رقم السجل التجاري',
+      crNumber: 'اختياري — رقم السجل التجاري', taxNumber: 'اختياري — الرقم الضريبي',
+      uploadCr: 'اختر ملفاً (PDF, JPG, PNG)', uploadLogo: 'اختر صورة (JPG, PNG, SVG)',
     },
     terms: 'أوافق على شروط الخدمة وسياسة الخصوصية',
     loginPrompt: 'لديك حساب بالفعل؟',
@@ -133,10 +165,13 @@ const T = {
       'احصل على عروض أسعار تنافسية من موردين معتمدين فوراً',
       'إدارة جميع المشتريات في منصة واحدة — من جدول الكميات للتسليم',
     ],
+    tags: ['🏗 إنشاءات', '🌍 الشرق الأوسط', '⚡ مشتريات'],
     stepTitle: ['معلومات الشركة', 'الأعمال والعمليات', 'المراجعة والتأكيد'],
     stepSub: ['أنشئ حساب المقاول الخاص بك', 'أخبرنا بما تنفّذه', 'خطوة أخيرة'],
+    verificationLabel: 'التحقق',
     selectSize: 'اختر حجم الشركة',
     selectCity: 'اختر المدينة',
+    selectYears: 'اختر سنوات العمل',
     selectWorkTypes: 'اختر نوع عمل واحداً على الأقل',
     success: 'تم إنشاء الحساب! جارٍ التحويل…',
     pwStrength: ['', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'],
@@ -146,18 +181,6 @@ const T = {
 /* ══════════════════════════════════════════════════════════════
    Helpers
    ══════════════════════════════════════════════════════════════ */
-
-function calcStrength(pw: string): { score: StrScore; color: string } {
-  if (!pw) return { score: 0, color: '' };
-  let s = 0;
-  if (pw.length >= 8)  s++;
-  if (pw.length >= 12) s++;
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
-  if (/\d/.test(pw))   s++;
-  if (/[^A-Za-z0-9]/.test(pw)) s++;
-  const score = Math.min(4, s) as StrScore;
-  return { score, color: ['', '#ef4444', '#f97316', '#eab308', '#22c55e'][score] };
-}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_RE = /^[\d\s\+\-\(\)]{7,20}$/;
@@ -195,16 +218,17 @@ function ContractorRegisterPageInner() {
 
   const [step, setStep]     = useState<Step>(1);
   const [anim, setAnim]     = useState<Anim>('');
-  const [showPw, setShowPw] = useState(false);
-  const [showCPw, setShowCPw] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError]     = useState('');
   const [success, setSuccess]       = useState(false);
+  const [crFileName, setCrFileName]     = useState('');
+  const [logoFileName, setLogoFileName] = useState('');
 
   const [form, setForm] = useState<FormData>({
     companyName: '', contactPerson: '', mobile: '', email: '',
     password: '', confirmPassword: '', workTypes: [],
-    companySize: '', crNumber: '', city: '', termsAccepted: false,
+    companySize: '', crNumber: '', taxNumber: '', countriesServed: [],
+    yearsInBusiness: '', city: '', termsAccepted: false,
   });
   const [errors, setErrors]   = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Touched>({});
@@ -215,8 +239,6 @@ function ContractorRegisterPageInner() {
   }, []);
 
   const err = (k: FieldKey) => touched[k] ? errors[k] : undefined;
-  const pwStrength = calcStrength(form.password);
-  const pct = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   function goNext() {
     const stepFields = step === 1 ? STEP1_FIELDS : STEP2_FIELDS;
@@ -260,57 +282,19 @@ function ContractorRegisterPageInner() {
   return (
     <div className="cr-root" dir={dir} lang={isArabic ? 'ar' : 'en'}>
 
-      {/* ── Brand panel ── */}
-      <aside className="cr-brand">
-        <div className="cr-brand-in">
-          <Link href="/" className="cr-logo">
-            <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
-              <rect x="0" y="0"   width="28" height="5" rx="2.5" fill="#2f6fe0"/>
-              <rect x="0" y="8.5" width="20" height="5" rx="2.5" fill="#fff" opacity=".9"/>
-              <rect x="0" y="17"  width="28" height="5" rx="2.5" fill="#fff" opacity=".55"/>
-            </svg>
-            <span className="cr-wordmark">bun<span className="oo">oo</span>d</span>
-          </Link>
-          <div className="cr-brand-copy">
-            <h1 className="cr-brand-title">{t.brand.title}</h1>
-            <p className="cr-brand-sub">{t.brand.sub}</p>
-          </div>
-          <ul className="cr-benefits">
-            {t.benefits.map((b, i) => (
-              <li key={i} className="cr-benefit">
-                <span className="cr-benefit-dot" />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="cr-brand-footer">
-            <span className="cr-tag">🏗 Construction</span>
-            <span className="cr-tag">🇸🇦 Saudi Arabia</span>
-            <span className="cr-tag">⚡ Procurement</span>
-          </div>
-        </div>
-      </aside>
+      <AuthBrandPanel
+        title={t.brand.title}
+        sub={t.brand.sub}
+        benefits={t.benefits}
+        tags={t.tags}
+        classPrefix="cr"
+      />
 
       {/* ── Form panel ── */}
       <main className="cr-main">
         <div className="cr-form-wrap">
 
-          <div className="cr-progress-bar">
-            <div className="cr-progress-fill" style={{ width: `${pct}%` }} />
-          </div>
-
-          <div className="cr-steps">
-            {t.steps.map((label, i) => (
-              <div key={i} className={`cr-step ${step === i + 1 ? 'active' : step > i + 1 ? 'done' : ''}`}>
-                <div className="cr-step-dot">
-                  {step > i + 1
-                    ? <svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round"/></svg>
-                    : i + 1}
-                </div>
-                <span className="cr-step-label">{label}</span>
-              </div>
-            ))}
-          </div>
+          <StepProgress steps={t.steps} current={step} classPrefix="cr" />
 
           <div className={`cr-card anim-${anim}`}>
             {success ? (
@@ -330,91 +314,73 @@ function ContractorRegisterPageInner() {
                 {/* ── Step 1: Company Info ── */}
                 {step === 1 && (
                   <div className="cr-fields">
-                    <Field label={t.labels.companyName} error={err('companyName')}>
+                    <FormField label={t.labels.companyName} error={err('companyName')} classPrefix="cr">
                       <input className={`cr-input ${err('companyName') ? 'has-error' : ''}`}
                         type="text" placeholder={t.placeholders.companyName}
                         value={form.companyName} onChange={e => set('companyName', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, companyName: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.contactPerson} error={err('contactPerson')}>
+                    <FormField label={t.labels.contactPerson} error={err('contactPerson')} classPrefix="cr">
                       <input className={`cr-input ${err('contactPerson') ? 'has-error' : ''}`}
                         type="text" placeholder={t.placeholders.contactPerson}
                         value={form.contactPerson} onChange={e => set('contactPerson', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, contactPerson: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.mobile} error={err('mobile')}>
+                    <FormField label={t.labels.mobile} error={err('mobile')} classPrefix="cr">
                       <input className={`cr-input ${err('mobile') ? 'has-error' : ''}`}
                         type="tel" placeholder={t.placeholders.mobile}
                         value={form.mobile} onChange={e => set('mobile', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, mobile: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.email} error={err('email')}>
+                    <FormField label={t.labels.email} error={err('email')} classPrefix="cr">
                       <input className={`cr-input ${err('email') ? 'has-error' : ''}`}
                         type="email" placeholder={t.placeholders.email}
                         value={form.email} onChange={e => set('email', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, email: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.password} error={err('password')}>
-                      <div className="cr-pw-wrap">
-                        <input className={`cr-input ${err('password') ? 'has-error' : ''}`}
-                          type={showPw ? 'text' : 'password'} placeholder={t.placeholders.password}
-                          value={form.password} onChange={e => set('password', e.target.value)}
-                          onBlur={() => setTouched(t => ({ ...t, password: true }))} />
-                        <button type="button" className="cr-pw-toggle" onClick={() => setShowPw(v => !v)}>
-                          {showPw ? '🙈' : '👁'}
-                        </button>
-                      </div>
-                      {form.password && (
-                        <div className="cr-pw-strength">
-                          <div className="cr-pw-bars">
-                            {[1,2,3,4].map(n => (
-                              <div key={n} className="cr-pw-bar" style={{ background: pwStrength.score >= n ? pwStrength.color : undefined }} />
-                            ))}
-                          </div>
-                          <span style={{ color: pwStrength.color }}>{t.pwStrength[pwStrength.score]}</span>
-                        </div>
-                      )}
-                    </Field>
+                    <PasswordField
+                      label={t.labels.password}
+                      value={form.password}
+                      onChange={v => set('password', v)}
+                      onBlur={() => setTouched(t => ({ ...t, password: true }))}
+                      placeholder={t.placeholders.password}
+                      error={err('password')}
+                      showStrength
+                      strengthLabels={t.pwStrength}
+                      classPrefix="cr"
+                    />
 
-                    <Field label={t.labels.confirmPassword} error={err('confirmPassword')}>
-                      <div className="cr-pw-wrap">
-                        <input className={`cr-input ${err('confirmPassword') ? 'has-error' : ''}`}
-                          type={showCPw ? 'text' : 'password'} placeholder={t.placeholders.confirmPassword}
-                          value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)}
-                          onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))} />
-                        <button type="button" className="cr-pw-toggle" onClick={() => setShowCPw(v => !v)}>
-                          {showCPw ? '🙈' : '👁'}
-                        </button>
-                      </div>
-                    </Field>
+                    <PasswordField
+                      label={t.labels.confirmPassword}
+                      value={form.confirmPassword}
+                      onChange={v => set('confirmPassword', v)}
+                      onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))}
+                      placeholder={t.placeholders.confirmPassword}
+                      error={err('confirmPassword')}
+                      classPrefix="cr"
+                    />
                   </div>
                 )}
 
                 {/* ── Step 2: Work Details ── */}
                 {step === 2 && (
                   <div className="cr-fields">
-                    <Field label={t.labels.workTypes} error={err('workTypes')}>
-                      <div className="cr-work-grid">
-                        {WORK_TYPES.map(w => (
-                          <button key={w.id} type="button"
-                            className={`cr-work-btn ${form.workTypes.includes(w.id) ? 'selected' : ''}`}
-                            onClick={() => set('workTypes', toggleItem(form.workTypes, w.id))}>
-                            <span className="cr-work-en">{w.en}</span>
-                            <span className="cr-work-ar">{w.ar}</span>
-                            {form.workTypes.includes(w.id) && (
-                              <span className="cr-work-check">✓</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </Field>
+                    <FormField label={t.labels.workTypes} error={err('workTypes')} classPrefix="cr">
+                      <MultiSelectGrid
+                        options={WORK_TYPES}
+                        selected={form.workTypes}
+                        onToggle={id => set('workTypes', toggleItem(form.workTypes, id))}
+                        classPrefix="cr-work"
+                        showCheck
+                      />
+                    </FormField>
 
                     <div className="cr-row-2">
-                      <Field label={t.labels.companySize} error={err('companySize')}>
+                      <FormField label={t.labels.companySize} error={err('companySize')} classPrefix="cr">
                         <select className={`cr-select ${err('companySize') ? 'has-error' : ''}`}
                           value={form.companySize} onChange={e => set('companySize', e.target.value)}>
                           <option value="">{t.selectSize}</option>
@@ -422,22 +388,77 @@ function ContractorRegisterPageInner() {
                             <option key={s.id} value={s.id}>{isArabic ? s.ar : s.en}</option>
                           ))}
                         </select>
-                      </Field>
+                      </FormField>
 
-                      <Field label={t.labels.city} error={err('city')}>
+                      <FormField label={t.labels.city} error={err('city')} classPrefix="cr">
                         <select className={`cr-select ${err('city') ? 'has-error' : ''}`}
                           value={form.city} onChange={e => set('city', e.target.value)}>
                           <option value="">{t.selectCity}</option>
                           {KSA_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
-                      </Field>
+                      </FormField>
                     </div>
 
-                    <Field label={t.labels.crNumber} error={err('crNumber')}>
-                      <input className="cr-input"
-                        type="text" placeholder={t.placeholders.crNumber}
-                        value={form.crNumber} onChange={e => set('crNumber', e.target.value)} />
-                    </Field>
+                    <FormField label={t.labels.yearsInBusiness} classPrefix="cr">
+                      <select className="cr-select"
+                        value={form.yearsInBusiness} onChange={e => set('yearsInBusiness', e.target.value)}>
+                        <option value="">{t.selectYears}</option>
+                        {YEARS_IN_BUSINESS_OPTS.map(o => (
+                          <option key={o.id} value={o.id}>{isArabic ? o.ar : o.en}</option>
+                        ))}
+                      </select>
+                    </FormField>
+
+                    <FormField label={t.labels.countriesServed} classPrefix="cr">
+                      <MultiSelectGrid
+                        options={COUNTRIES}
+                        selected={form.countriesServed}
+                        onToggle={id => set('countriesServed', toggleItem(form.countriesServed, id))}
+                        classPrefix="cr-country"
+                        showCheck
+                      />
+                    </FormField>
+
+                    <div className="cr-section-label">{t.verificationLabel}</div>
+
+                    <div className="cr-row-2">
+                      <FormField label={t.labels.crNumber} classPrefix="cr">
+                        <input className="cr-input"
+                          type="text" placeholder={t.placeholders.crNumber}
+                          value={form.crNumber} onChange={e => set('crNumber', e.target.value)} />
+                      </FormField>
+
+                      <FormField label={t.labels.taxNumber} classPrefix="cr">
+                        <input className="cr-input"
+                          type="text" placeholder={t.placeholders.taxNumber}
+                          value={form.taxNumber} onChange={e => set('taxNumber', e.target.value)} />
+                      </FormField>
+                    </div>
+
+                    <FormField label={t.labels.crUpload} classPrefix="cr">
+                      {/* Phase-3 placeholder: no upload wiring yet, just captures a filename locally. */}
+                      <label className="cr-upload">
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          className="cr-upload-input"
+                          onChange={e => setCrFileName(e.target.files?.[0]?.name ?? '')}
+                        />
+                        <span className="cr-upload-text">{crFileName || t.placeholders.uploadCr}</span>
+                      </label>
+                    </FormField>
+
+                    <FormField label={t.labels.logoUpload} classPrefix="cr">
+                      <label className="cr-upload">
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.svg"
+                          className="cr-upload-input"
+                          onChange={e => setLogoFileName(e.target.files?.[0]?.name ?? '')}
+                        />
+                        <span className="cr-upload-text">{logoFileName || t.placeholders.uploadLogo}</span>
+                      </label>
+                    </FormField>
                   </div>
                 )}
 
@@ -445,18 +466,33 @@ function ContractorRegisterPageInner() {
                 {step === 3 && (
                   <div className="cr-fields">
                     <div className="cr-review">
-                      <ReviewRow label={isArabic ? 'الشركة' : 'Company'} value={form.companyName} />
-                      <ReviewRow label={isArabic ? 'المسؤول' : 'Contact'} value={form.contactPerson} />
-                      <ReviewRow label={isArabic ? 'الجوال' : 'Mobile'} value={form.mobile} />
-                      <ReviewRow label={isArabic ? 'البريد الإلكتروني' : 'Email'} value={form.email} />
-                      <ReviewRow label={isArabic ? 'الأعمال' : 'Work Types'}
+                      <ReviewRow label={isArabic ? 'الشركة' : 'Company'} value={form.companyName} classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'المسؤول' : 'Contact'} value={form.contactPerson} classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'الجوال' : 'Mobile'} value={form.mobile} classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'البريد الإلكتروني' : 'Email'} value={form.email} classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'النشاط' : 'Main Activity'}
                         value={form.workTypes.map(id =>
                           WORK_TYPES.find(w => w.id === id)?.[isArabic ? 'ar' : 'en'] || id
-                        ).join(', ')} />
+                        ).join(', ')}
+                        classPrefix="cr" />
                       <ReviewRow label={isArabic ? 'حجم الشركة' : 'Company Size'}
-                        value={COMPANY_SIZES.find(s => s.id === form.companySize)?.[isArabic ? 'ar' : 'en'] || '—'} />
-                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} />
-                      {form.crNumber && <ReviewRow label={isArabic ? 'السجل التجاري' : 'CR Number'} value={form.crNumber} />}
+                        value={COMPANY_SIZES.find(s => s.id === form.companySize)?.[isArabic ? 'ar' : 'en'] || '—'}
+                        classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} classPrefix="cr" />
+                      {form.yearsInBusiness && (
+                        <ReviewRow label={isArabic ? 'سنوات العمل' : 'Years in Business'}
+                          value={YEARS_IN_BUSINESS_OPTS.find(o => o.id === form.yearsInBusiness)?.[isArabic ? 'ar' : 'en'] || '—'}
+                          classPrefix="cr" />
+                      )}
+                      {form.countriesServed.length > 0 && (
+                        <ReviewRow label={isArabic ? 'الدول' : 'Countries Served'}
+                          value={form.countriesServed.map(id =>
+                            COUNTRIES.find(c => c.id === id)?.[isArabic ? 'ar' : 'en'] || id
+                          ).join(', ')}
+                          classPrefix="cr" />
+                      )}
+                      {form.crNumber && <ReviewRow label={isArabic ? 'السجل التجاري' : 'CR Number'} value={form.crNumber} classPrefix="cr" />}
+                      {form.taxNumber && <ReviewRow label={isArabic ? 'الرقم الضريبي' : 'Tax Number'} value={form.taxNumber} classPrefix="cr" />}
                     </div>
 
                     <label className={`cr-terms ${err('termsAccepted') ? 'has-error' : ''}`}>
@@ -490,24 +526,6 @@ function ContractorRegisterPageInner() {
           </div>
         </div>
       </main>
-    </div>
-  );
-}
-
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="cr-field">
-      {label && <label className="cr-label">{label}</label>}
-      {children}
-      {error && <span className="cr-field-error">{error}</span>}
-    </div>
-  );
-}
-function ReviewRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="cr-review-row">
-      <span className="cr-review-label">{label}</span>
-      <span className="cr-review-value">{value}</span>
     </div>
   );
 }

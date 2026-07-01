@@ -1,8 +1,13 @@
 'use client';
 
-import { useState, useRef, useCallback, Suspense } from 'react';
+import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { FormField } from '../../../components/forms/FormField';
+import { PasswordField } from '../../../components/forms/PasswordField';
+import { MultiSelectGrid } from '../../../components/forms/MultiSelectGrid';
+import { StepProgress } from '../../../components/forms/StepProgress';
+import { ReviewRow } from '../../../components/forms/ReviewRow';
+import { AuthBrandPanel } from '../../../components/layout/AuthBrandPanel';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -11,7 +16,6 @@ import './page.css';
 
 type Step = 1 | 2 | 3;
 type Anim = 'forward' | 'back' | '';
-type StrScore = 0 | 1 | 2 | 3 | 4;
 
 interface FormData {
   fullName:         string;
@@ -21,6 +25,8 @@ interface FormData {
   confirmPassword:  string;
   specialization:   string;
   otherSpec:        string;
+  company:          string;
+  country:          string;
   licenseNumber:    string;
   yearsExperience:  string;
   city:             string;
@@ -57,6 +63,12 @@ const KSA_CITIES = [
   'Taif', 'Yanbu', 'Buraidah', 'Khamis Mushait', 'Qatif',
 ];
 
+const COUNTRIES = [
+  { id: 'EG', en: 'Egypt',         ar: 'مصر' },
+  { id: 'SA', en: 'Saudi Arabia',  ar: 'السعودية' },
+  { id: 'AE', en: 'United Arab Emirates', ar: 'الإمارات العربية المتحدة' },
+];
+
 const EXPERIENCE_OPTS = [
   { id: '0-2',   en: 'Less than 2 years',  ar: 'أقل من سنتين' },
   { id: '2-5',   en: '2 – 5 years',        ar: '2 – 5 سنوات' },
@@ -66,7 +78,7 @@ const EXPERIENCE_OPTS = [
 ];
 
 const STEP1_FIELDS: FieldKey[] = ['fullName', 'mobile', 'email', 'password', 'confirmPassword'];
-const STEP2_FIELDS: FieldKey[] = ['specialization', 'licenseNumber', 'yearsExperience', 'city'];
+const STEP2_FIELDS: FieldKey[] = ['specialization', 'country', 'yearsExperience', 'city'];
 const STEP3_FIELDS: FieldKey[] = ['termsAccepted'];
 
 /* ══════════════════════════════════════════════════════════════
@@ -75,22 +87,26 @@ const STEP3_FIELDS: FieldKey[] = ['termsAccepted'];
 
 const T = {
   en: {
-    brand: { title: 'Bunood for Engineers', sub: 'Join the network of certified engineers powering construction projects across Saudi Arabia.' },
+    brand: { title: 'Bunood for Engineers', sub: 'Join the network of certified engineers powering construction projects across the region.' },
     steps: ['Personal Info', 'Professional Details', 'Confirm'],
     nav: { back: 'Back', next: 'Next', submit: 'Create Account', login: 'Sign in' },
     labels: {
       fullName: 'Full Name', mobile: 'Mobile Number', email: 'Email Address',
       password: 'Password', confirmPassword: 'Confirm Password',
-      specialization: 'Engineering Specialization', otherSpec: 'Specify Specialization',
-      licenseNumber: 'Engineering License / ID Number',
+      specialization: 'Engineering Discipline', otherSpec: 'Specify Specialization',
+      company: 'Company (Optional)', country: 'Country',
+      licenseNumber: 'Engineering Syndicate Number (Optional)',
+      engineeringCard: 'Upload Engineering Card (Optional)',
       yearsExperience: 'Years of Experience', city: 'City',
       termsAccepted: '',
     },
     placeholders: {
-      fullName: 'Eng. Ahmed Al-Rashidi', mobile: '+966 5X XXX XXXX',
+      fullName: 'Eng. Ahmed Al-Rashidi', mobile: '+20 1X XXX XXXX',
       email: 'eng@example.com', password: 'Min. 8 characters',
       confirmPassword: 'Re-enter password', otherSpec: 'Enter your specialization',
-      licenseNumber: 'Saudi Council of Engineers ID',
+      company: 'Your company or firm', country: 'Select country',
+      licenseNumber: 'Syndicate membership number',
+      uploadCard: 'Choose a file (PDF, JPG, PNG)',
       city: 'Select city',
     },
     terms: 'I agree to the Terms of Service and Privacy Policy',
@@ -100,35 +116,42 @@ const T = {
       'Receive RFQs and procurement requests from top contractors',
       'Build your verified profile and grow your professional network',
     ],
+    tags: ['🏗 Construction', '🌍 Middle East', '🔒 Verified'],
     stepTitle: ['Your Information', 'Professional Details', 'Review & Confirm'],
     stepSub: [
       'Create your engineer account',
       'Tell us about your expertise',
       'Almost there — one last step',
     ],
+    verificationLabel: 'Verification',
     selectSpec: 'Select specialization',
     selectExp: 'Select experience',
     selectCity: 'Select city',
+    selectCountry: 'Select country',
     success: 'Account created! Redirecting…',
     pwStrength: ['', 'Weak', 'Fair', 'Good', 'Strong'],
   },
   ar: {
-    brand: { title: 'بنود للمهندسين', sub: 'انضم إلى شبكة المهندسين المعتمدين الذين يقودون مشاريع البناء في المملكة العربية السعودية.' },
+    brand: { title: 'بنود للمهندسين', sub: 'انضم إلى شبكة المهندسين المعتمدين الذين يقودون مشاريع البناء في المنطقة.' },
     steps: ['المعلومات الشخصية', 'التفاصيل المهنية', 'التأكيد'],
     nav: { back: 'رجوع', next: 'التالي', submit: 'إنشاء الحساب', login: 'تسجيل الدخول' },
     labels: {
       fullName: 'الاسم الكامل', mobile: 'رقم الجوال', email: 'البريد الإلكتروني',
       password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
       specialization: 'التخصص الهندسي', otherSpec: 'حدد التخصص',
-      licenseNumber: 'رقم الرخصة / هيئة المهندسين',
+      company: 'الشركة (اختياري)', country: 'الدولة',
+      licenseNumber: 'رقم نقابة المهندسين (اختياري)',
+      engineeringCard: 'رفع كارنيه نقابة المهندسين (اختياري)',
       yearsExperience: 'سنوات الخبرة', city: 'المدينة',
       termsAccepted: '',
     },
     placeholders: {
-      fullName: 'م. أحمد الرشيدي', mobile: '+966 5X XXX XXXX',
+      fullName: 'م. أحمد الرشيدي', mobile: '+20 1X XXX XXXX',
       email: 'eng@example.com', password: '٨ أحرف على الأقل',
       confirmPassword: 'أعد إدخال كلمة المرور', otherSpec: 'أدخل تخصصك',
-      licenseNumber: 'رقم هيئة المهندسين السعوديين',
+      company: 'شركتك أو مكتبك الهندسي', country: 'اختر الدولة',
+      licenseNumber: 'رقم عضوية النقابة',
+      uploadCard: 'اختر ملفاً (PDF, JPG, PNG)',
       city: 'اختر المدينة',
     },
     terms: 'أوافق على شروط الخدمة وسياسة الخصوصية',
@@ -138,15 +161,18 @@ const T = {
       'احصل على طلبات عروض الأسعار من كبار المقاولين',
       'ابنِ ملفك المهني المعتمد ووسّع شبكة علاقاتك',
     ],
+    tags: ['🏗 إنشاءات', '🌍 الشرق الأوسط', '🔒 موثّق'],
     stepTitle: ['معلوماتك', 'التفاصيل المهنية', 'المراجعة والتأكيد'],
     stepSub: [
       'أنشئ حسابك كمهندس',
       'أخبرنا عن خبرتك',
       'خطوة أخيرة فقط',
     ],
+    verificationLabel: 'التحقق',
     selectSpec: 'اختر التخصص',
     selectExp: 'اختر سنوات الخبرة',
     selectCity: 'اختر المدينة',
+    selectCountry: 'اختر الدولة',
     success: 'تم إنشاء الحساب! جارٍ التحويل…',
     pwStrength: ['', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'],
   },
@@ -155,18 +181,6 @@ const T = {
 /* ══════════════════════════════════════════════════════════════
    Helpers
    ══════════════════════════════════════════════════════════════ */
-
-function calcStrength(pw: string): { score: StrScore; label: string; color: string } {
-  if (!pw) return { score: 0, label: '', color: '' };
-  let s = 0;
-  if (pw.length >= 8)  s++;
-  if (pw.length >= 12) s++;
-  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
-  if (/\d/.test(pw))   s++;
-  if (/[^A-Za-z0-9]/.test(pw)) s++;
-  const score = Math.min(4, s) as StrScore;
-  return { score, label: '', color: ['', '#ef4444', '#f97316', '#eab308', '#22c55e'][score] };
-}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_RE = /^[\d\s\+\-\(\)]{7,20}$/;
@@ -186,6 +200,8 @@ function validate(data: FormData, step: Step): FieldErrors {
     e.confirmPassword = 'Passwords do not match';
   if (fields.includes('specialization') && !data.specialization)
     e.specialization = 'Please select your specialization';
+  if (fields.includes('country') && !data.country)
+    e.country = 'Please select your country';
   if (fields.includes('yearsExperience') && !data.yearsExperience)
     e.yearsExperience = 'Please select years of experience';
   if (fields.includes('city') && !data.city)
@@ -208,21 +224,18 @@ function EngineerRegisterPageInner() {
 
   const [step, setStep]     = useState<Step>(1);
   const [anim, setAnim]     = useState<Anim>('');
-  const [showPw, setShowPw] = useState(false);
-  const [showCPw, setShowCPw] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError]     = useState('');
   const [success, setSuccess]       = useState(false);
+  const [cardFileName, setCardFileName] = useState('');
 
   const [form, setForm] = useState<FormData>({
     fullName: '', mobile: '', email: '', password: '', confirmPassword: '',
-    specialization: '', otherSpec: '', licenseNumber: '',
-    yearsExperience: '', city: '', termsAccepted: false,
+    specialization: '', otherSpec: '', company: '', country: '',
+    licenseNumber: '', yearsExperience: '', city: '', termsAccepted: false,
   });
   const [errors, setErrors]   = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Touched>({});
-
-  const formRef = useRef<HTMLDivElement>(null);
 
   const set = useCallback(<K extends FieldKey>(k: K, v: FieldVal) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -230,8 +243,6 @@ function EngineerRegisterPageInner() {
   }, []);
 
   const err = (k: FieldKey) => touched[k] ? errors[k] : undefined;
-
-  const pwStrength = calcStrength(form.password);
 
   function goNext() {
     setTouched(Object.fromEntries((step === 1 ? STEP1_FIELDS : STEP2_FIELDS).map(k => [k, true])));
@@ -271,66 +282,25 @@ function EngineerRegisterPageInner() {
     }
   }
 
-  /* ── Progress % ── */
-  const pct = step === 1 ? 33 : step === 2 ? 66 : 100;
-
   return (
     <div className="er-root" dir={dir} lang={isArabic ? 'ar' : 'en'}>
 
-      {/* ── Brand panel ── */}
-      <aside className="er-brand">
-        <div className="er-brand-in">
-          <Link href="/" className="er-logo">
-            <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
-              <rect x="0" y="0"  width="28" height="5" rx="2.5" fill="#2f6fe0"/>
-              <rect x="0" y="8.5" width="20" height="5" rx="2.5" fill="#fff" opacity=".9"/>
-              <rect x="0" y="17" width="28" height="5" rx="2.5" fill="#fff" opacity=".55"/>
-            </svg>
-            <span className="er-wordmark">bun<span className="oo">oo</span>d</span>
-          </Link>
-          <div className="er-brand-copy">
-            <h1 className="er-brand-title">{t.brand.title}</h1>
-            <p className="er-brand-sub">{t.brand.sub}</p>
-          </div>
-          <ul className="er-benefits">
-            {t.benefits.map((b, i) => (
-              <li key={i} className="er-benefit">
-                <span className="er-benefit-dot" />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="er-brand-footer">
-            <span className="er-tag">🏗 Construction</span>
-            <span className="er-tag">🇸🇦 Saudi Arabia</span>
-            <span className="er-tag">🔒 Verified</span>
-          </div>
-        </div>
-      </aside>
+      <AuthBrandPanel
+        title={t.brand.title}
+        sub={t.brand.sub}
+        benefits={t.benefits}
+        tags={t.tags}
+        classPrefix="er"
+      />
 
       {/* ── Form panel ── */}
       <main className="er-main">
         <div className="er-form-wrap">
 
-          {/* Progress */}
-          <div className="er-progress-bar">
-            <div className="er-progress-fill" style={{ width: `${pct}%` }} />
-          </div>
-
-          {/* Steps */}
-          <div className="er-steps">
-            {t.steps.map((label, i) => (
-              <div key={i} className={`er-step ${step === i + 1 ? 'active' : step > i + 1 ? 'done' : ''}`}>
-                <div className="er-step-dot">
-                  {step > i + 1 ? <svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round"/></svg> : i + 1}
-                </div>
-                <span className="er-step-label">{label}</span>
-              </div>
-            ))}
-          </div>
+          <StepProgress steps={t.steps} current={step} classPrefix="er" />
 
           {/* Card */}
-          <div className={`er-card anim-${anim}`} ref={formRef}>
+          <div className={`er-card anim-${anim}`}>
 
             {success ? (
               <div className="er-success">
@@ -349,95 +319,91 @@ function EngineerRegisterPageInner() {
                 {/* ── Step 1: Personal Info ── */}
                 {step === 1 && (
                   <div className="er-fields">
-                    <Field label={t.labels.fullName} error={err('fullName')}>
+                    <FormField label={t.labels.fullName} error={err('fullName')} classPrefix="er">
                       <input className={`er-input ${err('fullName') ? 'has-error' : ''}`}
                         type="text" placeholder={t.placeholders.fullName}
                         value={form.fullName} onChange={e => set('fullName', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, fullName: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.mobile} error={err('mobile')}>
+                    <FormField label={t.labels.mobile} error={err('mobile')} classPrefix="er">
                       <input className={`er-input ${err('mobile') ? 'has-error' : ''}`}
                         type="tel" placeholder={t.placeholders.mobile}
                         value={form.mobile} onChange={e => set('mobile', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, mobile: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.email} error={err('email')}>
+                    <FormField label={t.labels.email} error={err('email')} classPrefix="er">
                       <input className={`er-input ${err('email') ? 'has-error' : ''}`}
                         type="email" placeholder={t.placeholders.email}
                         value={form.email} onChange={e => set('email', e.target.value)}
                         onBlur={() => setTouched(t => ({ ...t, email: true }))} />
-                    </Field>
+                    </FormField>
 
-                    <Field label={t.labels.password} error={err('password')}>
-                      <div className="er-pw-wrap">
-                        <input className={`er-input ${err('password') ? 'has-error' : ''}`}
-                          type={showPw ? 'text' : 'password'} placeholder={t.placeholders.password}
-                          value={form.password} onChange={e => set('password', e.target.value)}
-                          onBlur={() => setTouched(t => ({ ...t, password: true }))} />
-                        <button type="button" className="er-pw-toggle" onClick={() => setShowPw(v => !v)}>
-                          {showPw ? '🙈' : '👁'}
-                        </button>
-                      </div>
-                      {form.password && (
-                        <div className="er-pw-strength">
-                          <div className="er-pw-bars">
-                            {[1,2,3,4].map(n => (
-                              <div key={n} className="er-pw-bar" style={{ background: pwStrength.score >= n ? pwStrength.color : undefined }} />
-                            ))}
-                          </div>
-                          <span style={{ color: pwStrength.color }}>{t.pwStrength[pwStrength.score]}</span>
-                        </div>
-                      )}
-                    </Field>
+                    <PasswordField
+                      label={t.labels.password}
+                      value={form.password}
+                      onChange={v => set('password', v)}
+                      onBlur={() => setTouched(t => ({ ...t, password: true }))}
+                      placeholder={t.placeholders.password}
+                      error={err('password')}
+                      showStrength
+                      strengthLabels={t.pwStrength}
+                      classPrefix="er"
+                    />
 
-                    <Field label={t.labels.confirmPassword} error={err('confirmPassword')}>
-                      <div className="er-pw-wrap">
-                        <input className={`er-input ${err('confirmPassword') ? 'has-error' : ''}`}
-                          type={showCPw ? 'text' : 'password'} placeholder={t.placeholders.confirmPassword}
-                          value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)}
-                          onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))} />
-                        <button type="button" className="er-pw-toggle" onClick={() => setShowCPw(v => !v)}>
-                          {showCPw ? '🙈' : '👁'}
-                        </button>
-                      </div>
-                    </Field>
+                    <PasswordField
+                      label={t.labels.confirmPassword}
+                      value={form.confirmPassword}
+                      onChange={v => set('confirmPassword', v)}
+                      onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))}
+                      placeholder={t.placeholders.confirmPassword}
+                      error={err('confirmPassword')}
+                      classPrefix="er"
+                    />
                   </div>
                 )}
 
                 {/* ── Step 2: Professional Details ── */}
                 {step === 2 && (
                   <div className="er-fields">
-                    <Field label={t.labels.specialization} error={err('specialization')}>
-                      <div className="er-spec-grid">
-                        {SPECIALIZATIONS.map(s => (
-                          <button key={s.id} type="button"
-                            className={`er-spec-btn ${form.specialization === s.id ? 'selected' : ''}`}
-                            onClick={() => set('specialization', s.id)}>
-                            <span className="er-spec-en">{s.en}</span>
-                            <span className="er-spec-ar">{s.ar}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </Field>
+                    <FormField label={t.labels.specialization} error={err('specialization')} classPrefix="er">
+                      <MultiSelectGrid
+                        options={SPECIALIZATIONS}
+                        selected={form.specialization ? [form.specialization] : []}
+                        onToggle={id => set('specialization', id)}
+                        classPrefix="er-spec"
+                      />
+                    </FormField>
 
                     {form.specialization === 'other' && (
-                      <Field label={t.labels.otherSpec} error={err('otherSpec')}>
+                      <FormField label={t.labels.otherSpec} error={err('otherSpec')} classPrefix="er">
                         <input className="er-input"
                           type="text" placeholder={t.placeholders.otherSpec}
                           value={form.otherSpec} onChange={e => set('otherSpec', e.target.value)} />
-                      </Field>
+                      </FormField>
                     )}
 
-                    <Field label={t.labels.licenseNumber} error={err('licenseNumber')}>
-                      <input className="er-input"
-                        type="text" placeholder={t.placeholders.licenseNumber}
-                        value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} />
-                    </Field>
+                    <div className="er-row-2">
+                      <FormField label={t.labels.company} classPrefix="er">
+                        <input className="er-input"
+                          type="text" placeholder={t.placeholders.company}
+                          value={form.company} onChange={e => set('company', e.target.value)} />
+                      </FormField>
+
+                      <FormField label={t.labels.country} error={err('country')} classPrefix="er">
+                        <select className={`er-select ${err('country') ? 'has-error' : ''}`}
+                          value={form.country} onChange={e => set('country', e.target.value)}>
+                          <option value="">{t.selectCountry}</option>
+                          {COUNTRIES.map(c => (
+                            <option key={c.id} value={c.id}>{isArabic ? c.ar : c.en}</option>
+                          ))}
+                        </select>
+                      </FormField>
+                    </div>
 
                     <div className="er-row-2">
-                      <Field label={t.labels.yearsExperience} error={err('yearsExperience')}>
+                      <FormField label={t.labels.yearsExperience} error={err('yearsExperience')} classPrefix="er">
                         <select className={`er-select ${err('yearsExperience') ? 'has-error' : ''}`}
                           value={form.yearsExperience} onChange={e => set('yearsExperience', e.target.value)}>
                           <option value="">{t.selectExp}</option>
@@ -445,16 +411,37 @@ function EngineerRegisterPageInner() {
                             <option key={o.id} value={o.id}>{isArabic ? o.ar : o.en}</option>
                           ))}
                         </select>
-                      </Field>
+                      </FormField>
 
-                      <Field label={t.labels.city} error={err('city')}>
+                      <FormField label={t.labels.city} error={err('city')} classPrefix="er">
                         <select className={`er-select ${err('city') ? 'has-error' : ''}`}
                           value={form.city} onChange={e => set('city', e.target.value)}>
                           <option value="">{t.selectCity}</option>
                           {KSA_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
-                      </Field>
+                      </FormField>
                     </div>
+
+                    <div className="er-section-label">{t.verificationLabel}</div>
+
+                    <FormField label={t.labels.licenseNumber} classPrefix="er">
+                      <input className="er-input"
+                        type="text" placeholder={t.placeholders.licenseNumber}
+                        value={form.licenseNumber} onChange={e => set('licenseNumber', e.target.value)} />
+                    </FormField>
+
+                    <FormField label={t.labels.engineeringCard} classPrefix="er">
+                      {/* Phase-3 placeholder: no upload wiring yet, just captures a filename locally. */}
+                      <label className="er-upload">
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          className="er-upload-input"
+                          onChange={e => setCardFileName(e.target.files?.[0]?.name ?? '')}
+                        />
+                        <span className="er-upload-text">{cardFileName || t.placeholders.uploadCard}</span>
+                      </label>
+                    </FormField>
                   </div>
                 )}
 
@@ -462,15 +449,21 @@ function EngineerRegisterPageInner() {
                 {step === 3 && (
                   <div className="er-fields">
                     <div className="er-review">
-                      <ReviewRow label={isArabic ? 'الاسم' : 'Name'} value={form.fullName} />
-                      <ReviewRow label={isArabic ? 'الجوال' : 'Mobile'} value={form.mobile} />
-                      <ReviewRow label={isArabic ? 'البريد الإلكتروني' : 'Email'} value={form.email} />
+                      <ReviewRow label={isArabic ? 'الاسم' : 'Name'} value={form.fullName} classPrefix="er" />
+                      <ReviewRow label={isArabic ? 'الجوال' : 'Mobile'} value={form.mobile} classPrefix="er" />
+                      <ReviewRow label={isArabic ? 'البريد الإلكتروني' : 'Email'} value={form.email} classPrefix="er" />
                       <ReviewRow label={isArabic ? 'التخصص' : 'Specialization'}
-                        value={SPECIALIZATIONS.find(s => s.id === form.specialization)?.[isArabic ? 'ar' : 'en'] || form.otherSpec || '—'} />
-                      {form.licenseNumber && <ReviewRow label={isArabic ? 'رقم الرخصة' : 'License No.'} value={form.licenseNumber} />}
+                        value={SPECIALIZATIONS.find(s => s.id === form.specialization)?.[isArabic ? 'ar' : 'en'] || form.otherSpec || '—'}
+                        classPrefix="er" />
+                      {form.company && <ReviewRow label={isArabic ? 'الشركة' : 'Company'} value={form.company} classPrefix="er" />}
+                      <ReviewRow label={isArabic ? 'الدولة' : 'Country'}
+                        value={COUNTRIES.find(c => c.id === form.country)?.[isArabic ? 'ar' : 'en'] || '—'}
+                        classPrefix="er" />
+                      {form.licenseNumber && <ReviewRow label={isArabic ? 'رقم النقابة' : 'Syndicate No.'} value={form.licenseNumber} classPrefix="er" />}
                       <ReviewRow label={isArabic ? 'الخبرة' : 'Experience'}
-                        value={EXPERIENCE_OPTS.find(o => o.id === form.yearsExperience)?.[isArabic ? 'ar' : 'en'] || '—'} />
-                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} />
+                        value={EXPERIENCE_OPTS.find(o => o.id === form.yearsExperience)?.[isArabic ? 'ar' : 'en'] || '—'}
+                        classPrefix="er" />
+                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} classPrefix="er" />
                     </div>
 
                     <label className={`er-terms ${err('termsAccepted') ? 'has-error' : ''}`}>
@@ -505,25 +498,6 @@ function EngineerRegisterPageInner() {
           </div>
         </div>
       </main>
-    </div>
-  );
-}
-
-/* ── Sub-components ── */
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="er-field">
-      {label && <label className="er-label">{label}</label>}
-      {children}
-      {error && <span className="er-field-error">{error}</span>}
-    </div>
-  );
-}
-function ReviewRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="er-review-row">
-      <span className="er-review-label">{label}</span>
-      <span className="er-review-value">{value}</span>
     </div>
   );
 }

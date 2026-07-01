@@ -926,3 +926,82 @@
 @media (max-width: 768px) {
   .cr-work-grid { grid-template-columns: 1fr;; }
 }
+
+/* ── Countries served grid (shares the work-grid button style) ─ */
+.cr-country-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.cr-country-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  text-align: left;
+}
+[dir="rtl"] .cr-country-btn { text-align: right; align-items: flex-end; }
+.cr-country-btn:hover { border-color: var(--blue-border); background: var(--blue-soft); }
+.cr-country-btn.selected { border-color: var(--blue); background: var(--blue-soft); }
+.cr-country-en { font-size: 13px; font-weight: 600; color: var(--body-text); }
+.cr-country-ar { font-size: 11.5px; color: var(--sub-text); }
+.cr-country-btn.selected .cr-country-en { color: var(--blue); }
+.cr-country-check {
+  position: absolute;
+  top: 8px; right: 10px;
+  font-size: 11px;
+  color: var(--blue);
+  font-weight: 700;
+}
+[dir="rtl"] .cr-country-check { right: auto; left: 10px; }
+
+@media (max-width: 768px) {
+  .cr-country-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Verification section divider (within Step 2) */
+.cr-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--sub-text);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+/* File upload placeholder (Phase 3: not wired to storage yet) */
+.cr-upload {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.cr-upload:hover { border-color: var(--blue-border); }
+.cr-upload-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.cr-upload-text {
+  font-size: 14px;
+  color: var(--sub-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

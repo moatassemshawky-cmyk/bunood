@@ -308,6 +308,46 @@
   gap: 16px;
 }
 
+/* Verification section divider (within Step 2) */
+.er-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--sub-text);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+/* File upload placeholder (Phase 3: not wired to storage yet) */
+.er-upload {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.er-upload:hover { border-color: var(--blue-border); }
+.er-upload-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.er-upload-text {
+  font-size: 14px;
+  color: var(--sub-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Specialization grid */
 .er-spec-grid {
   display: grid;
