@@ -71,10 +71,9 @@
 /* Base — hero-bg.jpg visible with dark overlay + blue glow stack */
 .bn-hero {
   position: relative;
-  min-height: calc(100svh - var(--header-h));
-  height: calc(100svh - var(--header-h));
-  max-height: calc(100svh - var(--header-h));
-  background: url('/hero-bg.jpg') center / cover no-repeat #0f1117;
+  /* Keep hero inside the first viewport: prefer slightly shorter than full viewport */
+  height: min(95svh, calc(100svh - var(--header-h)));
+  background: url('/hero-bg.jpg') right center / 85% auto no-repeat #0f1117;
   overflow: hidden;
   display: flex;
   align-items: stretch;
@@ -109,8 +108,9 @@
   display: grid;
   grid-template-columns: 50fr 50fr;
   align-items: center;
-  min-height: calc(100svh - var(--header-h));
-  height: calc(100svh - var(--header-h));
+  /* let the parent hero control height; avoid duplicate full-viewport constraints */
+  min-height: 0;
+  height: 100%;
 }
 
 /* RTL (Arabic): swap columns — ledger right, copy left */
@@ -119,7 +119,8 @@
 
 /* Ledger column — pushed toward the centre gap so it visually connects with copy */
 .bn-hero-ledger-col {
-  padding: clamp(48px, 7vh, 96px) clamp(16px, 1.5vw, 28px) clamp(48px, 7vh, 96px) clamp(40px, 4.5vw, 72px);
+  /* reduce vertical padding so ledger doesn't push the hero taller */
+  padding: clamp(20px, 4.5vh, 48px) clamp(12px, 1.5vw, 28px);
   display: flex; align-items: center; justify-content: flex-end;
 }
 
@@ -132,8 +133,10 @@
 
 /* Copy column — entrance animation staggered after ledger */
 .bn-hero-copy-col {
-  padding: clamp(48px, 7vh, 96px) clamp(48px, 5.5vw, 88px) clamp(48px, 7vh, 96px) clamp(20px, 2vw, 36px);
+  /* reduce top/bottom padding and keep copy vertically centered without pushing layout */
+  padding: clamp(20px, 4.5vh, 48px) clamp(28px, 5.5vw, 88px) clamp(20px, 4.5vh, 48px) clamp(16px, 2vw, 36px);
   display: flex; flex-direction: column; justify-content: center;
+  gap: 8px;
   animation: bn-copy-rise 1s cubic-bezier(.2,.7,.2,1) .28s both;
 }
 
@@ -165,7 +168,7 @@
   font-family: var(--display); font-weight: 700;
   font-size: clamp(40px, 5.0vw, 66px);
   line-height: 1.08; letter-spacing: -.035em;
-  margin: 0 0 20px; color: #fff; max-width: 13em;
+  margin: 0 0 12px; color: #fff; max-width: 13em;
 }
 
 /* H1 accent: blue phrase, forced to new line for English */
@@ -183,13 +186,13 @@
 /* Hero subtitle — narrower max-width keeps the eye moving fast */
 .bn-hero-lede {
   font-family: var(--body); font-size: clamp(15px, 1.15vw, 16.5px);
-  line-height: 1.72; color: rgba(255,255,255,.60);
-  margin: 0 0 28px; max-width: 30em;
+  line-height: 1.64; color: rgba(255,255,255,.60);
+  margin: 0 0 16px; max-width: 30em;
 }
 [dir="rtl"] .bn-hero-lede { line-height: 1.88; max-width: 26em; }
 
 /* Hero CTA row */
-.bn-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 0; }
+.bn-hero-cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 0; }
 
 /* Primary hero CTA — larger than nav buttons, with a subtle authority glow */
 .bn-btn-hero {
@@ -287,7 +290,7 @@
   border: 1px solid rgba(255,255,255,.18);
   border-top-color: rgba(255,255,255,.28);
   border-radius: 20px;
-  padding: 14px 14px 12px 14px;
+  padding: 12px 12px 10px 12px;
   box-shadow:
     0 0 0 1px rgba(47,111,224,.16),
     0 40px 80px -16px rgba(0,0,0,.86),
@@ -304,6 +307,40 @@
     0 0 72px -8px rgba(47,111,224,.3),
     inset 0 1px 0 rgba(255,255,255,.13);
   transform: translateY(-5px) scale(1.006);
+}
+
+/* Constrain ledger height to avoid pushing hero past viewport and keep visual balance */
+.bn-hero .bn-ledger {
+  /* relative to hero height: keep ledger smaller than copy column */
+  max-height: 78%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .bn-hero { background-size: 92% auto; }
+  .bn-hero-stage { grid-template-columns: 52fr 48fr; }
+  .bn-hero-ledger-col { padding-left: clamp(16px, 3vh, 36px); padding-right: clamp(12px, 2vw, 24px); }
+  .bn-hero-copy-col   { padding-left: clamp(24px, 4vw, 56px); padding-right: clamp(12px, 2vw, 24px); }
+}
+
+@media (max-width: 900px) {
+  .bn-hero { height: auto; padding-block: 28px; background-position: center; background-size: cover; }
+  .bn-hero-stage { grid-template-columns: 1fr; gap: 18px; align-items: start; }
+  .bn-hero-copy-col { justify-content: flex-start; padding-top: 18px; }
+  .bn-hero-ledger-col { justify-content: center; padding: 0 16px 12px; }
+  .bn-hero .bn-ledger { width: min(560px, 94%); max-height: none; }
+  .bn-h1 { font-size: clamp(28px, 7vw, 44px); }
+}
+
+@media (max-width: 600px) {
+  .bn-hero { padding-block: 12px; }
+  .bn-hero-stage { grid-template-columns: 1fr; }
+  .bn-hero-copy-col { padding: 16px 20px; }
+  .bn-hero-ledger-col { padding: 0 16px 20px; }
+  .bn-h1 { font-size: clamp(22px, 8vw, 34px); margin-bottom: 10px; }
+  .bn-hero-lede { margin-bottom: 12px; }
+  .bn-hero-cta { gap: 8px; }
+  .bn-hero .bn-ledger { order: 2; width: 100%; max-width: 760px; }
 }
 
 /* Procurement OS dashboard — dark palette (hero context) */
