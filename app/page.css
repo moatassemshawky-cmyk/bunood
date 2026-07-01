@@ -11,6 +11,7 @@
 
 .bn-root {
   --blue: #2f6fe0;
+  --header-h: 66px;
   --graphite: #2c313a;
   --grey: #9aa3ae;
   --mist: #f3f5f7;
@@ -38,7 +39,7 @@
   border-bottom: 1px solid var(--line);
 }
 .bn-header .bn-wrap { max-width: none; margin: 0; padding: 0 48px; }
-.bn-header-in { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+.bn-header-in { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
 .bn-logo { display: inline-flex; align-items: center; gap: 8px; }
 .bn-word { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -.01em; color: var(--graphite); }
 .bn-logo-sm .bn-word { font-size: 14px; }
@@ -70,9 +71,9 @@
 /* Base — hero-bg.jpg visible with dark overlay + blue glow stack */
 .bn-hero {
   position: relative;
-  min-height: calc(100svh - 66px);
-  height: calc(100svh - 66px);
-  max-height: calc(100svh - 66px);
+  min-height: calc(100svh - var(--header-h));
+  height: calc(100svh - var(--header-h));
+  max-height: calc(100svh - var(--header-h));
   background: url('/hero-bg.jpg') center / cover no-repeat #0f1117;
   overflow: hidden;
   display: flex;
@@ -82,7 +83,8 @@
 /* Dark overlay — slightly darker to push text contrast and reduce photo noise */
 .bn-hero::before {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: rgba(6, 8, 14, 0.82);
+  /* stronger top->bottom fade to reduce background noise behind the ledger */
+  background: linear-gradient(to bottom, rgba(6,8,14,.72) 0%, rgba(6,8,14,.92) 100%);
 }
 
 /* Blue atmospheric glow — intentionally restrained so it doesn't compete with UI */
@@ -107,8 +109,8 @@
   display: grid;
   grid-template-columns: 50fr 50fr;
   align-items: center;
-  min-height: calc(100svh - 66px);
-  height: calc(100svh - 66px);
+  min-height: calc(100svh - var(--header-h));
+  height: calc(100svh - var(--header-h));
 }
 
 /* RTL (Arabic): swap columns — ledger right, copy left */
@@ -279,17 +281,18 @@
 /* More opaque, less blurry = sharper, feels like a real product UI */
 .bn-hero .bn-ledger {
   width: 100%; max-width: 560px; overflow: hidden;
-  background: rgba(14, 18, 28, 0.82);
-  backdrop-filter: blur(18px) saturate(1.7);
-  -webkit-backdrop-filter: blur(18px) saturate(1.7);
-  border: 1px solid rgba(255,255,255,.16);
-  border-top-color: rgba(255,255,255,.24);
+  background: rgba(14, 18, 28, 0.92);
+  backdrop-filter: blur(18px) saturate(1.8);
+  -webkit-backdrop-filter: blur(18px) saturate(1.8);
+  border: 1px solid rgba(255,255,255,.18);
+  border-top-color: rgba(255,255,255,.28);
   border-radius: 20px;
+  padding: 14px 14px 12px 14px;
   box-shadow:
     0 0 0 1px rgba(47,111,224,.16),
-    0 40px 80px -16px rgba(0,0,0,.80),
-    0 0 56px -12px rgba(47,111,224,.22),
-    inset 0 1px 0 rgba(255,255,255,.10);
+    0 40px 80px -16px rgba(0,0,0,.86),
+    0 0 56px -12px rgba(47,111,224,.26),
+    inset 0 1px 0 rgba(255,255,255,.08);
   animation: bn-ledger-float 5s ease-in-out infinite,
              bn-rise .9s cubic-bezier(.2,.7,.2,1) .1s both;
   transition: box-shadow .4s ease, transform .4s ease;
@@ -487,8 +490,8 @@
 .bn-act-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: #c4ccd4; }
 .bn-act-item.is-blue  .bn-act-dot { background: var(--blue); box-shadow: 0 0 5px rgba(47,111,224,.45); }
 .bn-act-item.is-green .bn-act-dot { background: #16a34a; }
-.bn-act-txt { flex: 1; font-size: 11.5px; color: var(--graphite); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bn-act-time { flex-shrink: 0; font-size: 10.5px; color: var(--grey); font-family: var(--mono); white-space: nowrap; }
+.bn-act-txt { flex: 1; font-size: 13px; color: rgba(255,255,255,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bn-act-time { flex-shrink: 0; font-size: 11.5px; color: rgba(255,255,255,.56); font-family: var(--mono); white-space: nowrap; }
 
 /* ---- CTA / Waitlist section ---------------------------------------- */
 .bn-cta { background: var(--graphite); color: #fff; text-align: center; }
