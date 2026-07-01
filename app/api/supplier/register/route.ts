@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { createNeonClient } from '../../../../lib/neon';
+import { withClient } from '../../../../lib/db';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_RE = /^[\d\s\+\-\(\)]{7,20}$/;
@@ -45,46 +45,45 @@ export async function POST(request: Request) {
   const passwordHash = await bcrypt.hash(password as string, 12);
 
   /* ── Persist ──────────────────────────────────────────── */
-  const client = createNeonClient();
   try {
-    await client.connect();
+    return await withClient(async (client) => {
+      const safeEmail = (email as string).trim().toLowerCase();
 
-    const safeEmail = (email as string).trim().toLowerCase();
+      // Insert supplier
+      const { rows } = await client.query<{ id: number }>(
+        `INSERT INTO suppliers
+           (company_name, contact_person, mobile, email, password_hash,
+            categories, delivery_areas, terms_accepted)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+         RETURNING id`,
+        [
+          (companyName as string).trim(),
+          (contactPerson as string).trim(),
+          (mobile as string).trim(),
+          safeEmail,
+          passwordHash,
+          categories as string[],
+          deliveryAreas as string[],
+          true,
+        ],
+      );
 
-    // Insert supplier
-    const { rows } = await client.query<{ id: number }>(
-      `INSERT INTO suppliers
-         (company_name, contact_person, mobile, email, password_hash,
-          categories, delivery_areas, terms_accepted)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       RETURNING id`,
-      [
-        (companyName as string).trim(),
-        (contactPerson as string).trim(),
-        (mobile as string).trim(),
-        safeEmail,
-        passwordHash,
-        categories as string[],
-        deliveryAreas as string[],
-        true,
-      ],
-    );
+      const supplierId = rows[0].id;
 
-    const supplierId = rows[0].id;
+      // Create session token
+      const token = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
+      await client.query(
+        `INSERT INTO supplier_sessions (token, supplier_id, expires_at)
+         VALUES ($1, $2, $3)`,
+        [token, supplierId, expiresAt],
+      );
 
-    // Create session token
-    const token = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
-    await client.query(
-      `INSERT INTO supplier_sessions (token, supplier_id, expires_at)
-       VALUES ($1, $2, $3)`,
-      [token, supplierId, expiresAt],
-    );
-
-    return NextResponse.json(
-      { success: true, supplierId },
-      { headers: { 'Set-Cookie': sessionCookie(token) } },
-    );
+      return NextResponse.json(
+        { success: true, supplierId },
+        { headers: { 'Set-Cookie': sessionCookie(token) } },
+      );
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes('unique') || msg.includes('duplicate')) {
@@ -95,7 +94,5 @@ export async function POST(request: Request) {
     }
     console.error('[supplier/register]', err);
     return NextResponse.json({ error: 'Registration failed. Try again.' }, { status: 500 });
-  } finally {
-    await client.end().catch(() => {});
   }
 }
