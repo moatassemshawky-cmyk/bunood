@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -235,7 +236,6 @@ const T = {
   },
 } as const;
 
-type Lang = keyof typeof T;
 type Translations = typeof T.en;
 
 /* ══════════════════════════════════════════════════════════════
@@ -291,7 +291,7 @@ function validate(field: FieldKey, val: FieldVal, all: FormData, t: Translations
 
 function Logo({ light }: { light?: boolean }) {
   return (
-    <a href="/" className="sr-logo" dir="ltr" aria-label="bunood — go to home">
+    <Link href="/" className="sr-logo" dir="ltr" aria-label="bunood — go to home">
       <svg width="30" height="30" viewBox="0 0 96 96" fill="none" aria-hidden>
         <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
           <path d="M20 38 V23 Q20 20 23 20 H38" fill="none"/>
@@ -306,7 +306,7 @@ function Logo({ light }: { light?: boolean }) {
       <span className="sr-wordmark">
         bun<span className="oo">oo</span>d
       </span>
-    </a>
+    </Link>
   );
 }
 
@@ -607,7 +607,7 @@ function Step1({ data, errors, touched, onChange, onBlur, onNext, t }: StepProps
 
 interface Step2Props extends StepProps { onBack: () => void; isArabic: boolean; }
 
-function Step2({ data, errors, touched, onChange, onBlur, onNext, onBack, t, isArabic }: Step2Props) {
+function Step2({ data, errors, touched, onChange, onNext, onBack, t, isArabic }: Step2Props) {
   const s = t.step2;
   const lang = isArabic ? 'ar' : 'en';
 
@@ -826,13 +826,11 @@ function SupplierRegisterPageInner() {
 
   const [step,        setStep]       = useState<Step>(1);
   const [anim,        setAnim]       = useState<Anim>('');
-  const [animKey,     setAnimKey]    = useState(0);
   const [data,        setData]       = useState<FormData>(INIT);
   const [errors,      setErrors]     = useState<FieldErrors>({});
   const [touched,     setTouched]    = useState<Touched>({});
   const [submitting,  setSubmitting] = useState(false);
-  const [submitted,   setSubmitted]  = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [, setSubmitError] = useState('');
 
   const updateField = useCallback((field: FieldKey, value: FieldVal) => {
     setData(d => {
@@ -870,14 +868,12 @@ function SupplierRegisterPageInner() {
     const fields = step === 1 ? STEP1_FIELDS : step === 2 ? STEP2_FIELDS : STEP3_FIELDS;
     if (!validateStep(fields)) return;
     setAnim('forward');
-    setAnimKey(k => k + 1);
     setStep(s => (s + 1) as Step);
     scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goBack = () => {
     setAnim('back');
-    setAnimKey(k => k + 1);
     setStep(s => (s - 1) as Step);
     scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -914,28 +910,6 @@ function SupplierRegisterPageInner() {
       setSubmitting(false);
     }
   };
-
-  if (submitted) {
-    const s = t.success;
-    return (
-      <div className="sr-root" lang={isArabic ? 'ar' : 'en'}>
-        <BrandPanel t={t} />
-        <main className="sr-form-panel" dir={dir}>
-          <div className="sr-success">
-            <div className="sr-success-icon">
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            <h2 className="sr-success-title">{s.title}</h2>
-            <p className="sr-success-sub">{s.sub(data.companyName)}</p>
-            <a href="/supplier/login" className="sr-btn-primary sr-btn-inline">{s.btn}</a>
-            <p style={{ fontSize: 13, color: '#9aa3ae', marginTop: 4 }}>{s.note}</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   const stepProps = {
     data,

@@ -21,6 +21,6 @@ export async function withClient<T>(fn: (client: Client) => Promise<T>): Promise
     console.error('[db] error', err);
     throw err;
   } finally {
-    try { await client.end(); } catch (e) { /* ignore */ }
+    try { await client.end(); } catch { /* ignore */ }
   }
 }

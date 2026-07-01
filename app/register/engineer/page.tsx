@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useState, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -170,7 +171,7 @@ function calcStrength(pw: string): { score: StrScore; label: string; color: stri
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MOBILE_RE = /^[\d\s\+\-\(\)]{7,20}$/;
 
-function validate(data: FormData, step: Step, t: typeof T.en): FieldErrors {
+function validate(data: FormData, step: Step): FieldErrors {
   const e: FieldErrors = {};
   const fields = step === 1 ? STEP1_FIELDS : step === 2 ? STEP2_FIELDS : STEP3_FIELDS;
   if (fields.includes('fullName') && data.fullName.trim().length < 2)
@@ -234,7 +235,7 @@ function EngineerRegisterPageInner() {
 
   function goNext() {
     setTouched(Object.fromEntries((step === 1 ? STEP1_FIELDS : STEP2_FIELDS).map(k => [k, true])));
-    const errs = validate(form, step, t);
+    const errs = validate(form, step);
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
     setAnim('forward');
@@ -249,7 +250,7 @@ function EngineerRegisterPageInner() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setTouched({ termsAccepted: true });
-    const errs = validate(form, 3, t);
+    const errs = validate(form, 3);
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
     setSubmitting(true);
@@ -279,14 +280,14 @@ function EngineerRegisterPageInner() {
       {/* ── Brand panel ── */}
       <aside className="er-brand">
         <div className="er-brand-in">
-          <a href="/" className="er-logo">
+          <Link href="/" className="er-logo">
             <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
               <rect x="0" y="0"  width="28" height="5" rx="2.5" fill="#2f6fe0"/>
               <rect x="0" y="8.5" width="20" height="5" rx="2.5" fill="#fff" opacity=".9"/>
               <rect x="0" y="17" width="28" height="5" rx="2.5" fill="#fff" opacity=".55"/>
             </svg>
             <span className="er-wordmark">bun<span className="oo">oo</span>d</span>
-          </a>
+          </Link>
           <div className="er-brand-copy">
             <h1 className="er-brand-title">{t.brand.title}</h1>
             <p className="er-brand-sub">{t.brand.sub}</p>

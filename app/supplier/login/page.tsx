@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import './page.css';
 
 export default function SupplierLoginPage() {
@@ -36,7 +37,7 @@ export default function SupplierLoginPage() {
     <div className="sl-root">
       {/* Brand side */}
       <div className="sl-brand" aria-hidden>
-        <a href="/" className="sl-brand-logo">
+        <Link href="/" className="sl-brand-logo">
           <svg width="40" height="40" viewBox="0 0 96 96" fill="none">
             <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
               <path d="M20 38 V23 Q20 20 23 20 H38" fill="none"/>
@@ -49,7 +50,7 @@ export default function SupplierLoginPage() {
             </g>
           </svg>
           <span className="sl-brand-name">bun<span className="sl-blue">oo</span>d</span>
-        </a>
+        </Link>
         <p className="sl-brand-tagline">Construction Procurement OS</p>
       </div>
 

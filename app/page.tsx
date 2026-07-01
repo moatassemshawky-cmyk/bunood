@@ -215,8 +215,6 @@ const ACTIVITY_DATA = {
   ],
 };
 
-const formatNumber = (n: number) => n.toLocaleString('en-US');
-
 /* ================================================================== */
 
 export default function Home() {

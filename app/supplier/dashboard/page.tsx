@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createNeonClient } from '../../../lib/neon';
 import './page.css';
 
@@ -53,7 +54,7 @@ export default async function SupplierDashboard() {
     <div className="sd-root">
       {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className="sd-sidebar">
-        <a href="/" className="sd-sidebar-logo">
+        <Link href="/" className="sd-sidebar-logo">
           <svg width="28" height="28" viewBox="0 0 96 96" fill="none">
             <g stroke="#2F6FE0" strokeWidth="7" strokeLinecap="round">
               <path d="M20 38 V23 Q20 20 23 20 H38" fill="none"/>
@@ -66,7 +67,7 @@ export default async function SupplierDashboard() {
             </g>
           </svg>
           <span className="sd-logo-text">bun<span className="sd-blue">oo</span>d</span>
-        </a>
+        </Link>
 
         <nav className="sd-nav">
           <a href="/supplier/dashboard" className="sd-navlink is-active">

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import './page.css';
 
 /* ══════════════════════════════════════════════════════════════
@@ -262,14 +263,14 @@ function ContractorRegisterPageInner() {
       {/* ── Brand panel ── */}
       <aside className="cr-brand">
         <div className="cr-brand-in">
-          <a href="/" className="cr-logo">
+          <Link href="/" className="cr-logo">
             <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
               <rect x="0" y="0"   width="28" height="5" rx="2.5" fill="#2f6fe0"/>
               <rect x="0" y="8.5" width="20" height="5" rx="2.5" fill="#fff" opacity=".9"/>
               <rect x="0" y="17"  width="28" height="5" rx="2.5" fill="#fff" opacity=".55"/>
             </svg>
             <span className="cr-wordmark">bun<span className="oo">oo</span>d</span>
-          </a>
+          </Link>
           <div className="cr-brand-copy">
             <h1 className="cr-brand-title">{t.brand.title}</h1>
             <p className="cr-brand-sub">{t.brand.sub}</p>
