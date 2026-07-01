@@ -26,7 +26,6 @@ interface FormData {
   specialization:   string;
   otherSpec:        string;
   company:          string;
-  country:          string;
   licenseNumber:    string;
   yearsExperience:  string;
   city:             string;
@@ -57,16 +56,34 @@ const SPECIALIZATIONS = [
   { id: 'other',         en: 'Other',                      ar: 'أخرى' },
 ];
 
-const KSA_CITIES = [
-  'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar',
-  'Dhahran', 'Jubail', 'Tabuk', 'Abha', 'Hail', 'Najran',
-  'Taif', 'Yanbu', 'Buraidah', 'Khamis Mushait', 'Qatif',
-];
-
-const COUNTRIES = [
-  { id: 'EG', en: 'Egypt',         ar: 'مصر' },
-  { id: 'SA', en: 'Saudi Arabia',  ar: 'السعودية' },
-  { id: 'AE', en: 'United Arab Emirates', ar: 'الإمارات العربية المتحدة' },
+const EGYPT_GOVERNORATES = [
+  { en: 'Cairo',          ar: 'القاهرة' },
+  { en: 'Giza',           ar: 'الجيزة' },
+  { en: 'Alexandria',     ar: 'الإسكندرية' },
+  { en: 'Qalyubia',       ar: 'القليوبية' },
+  { en: 'Port Said',      ar: 'بورسعيد' },
+  { en: 'Suez',           ar: 'السويس' },
+  { en: 'Dakahlia',       ar: 'الدقهلية' },
+  { en: 'Sharqia',        ar: 'الشرقية' },
+  { en: 'Gharbia',        ar: 'الغربية' },
+  { en: 'Monufia',        ar: 'المنوفية' },
+  { en: 'Beheira',        ar: 'البحيرة' },
+  { en: 'Kafr El Sheikh', ar: 'كفر الشيخ' },
+  { en: 'Damietta',       ar: 'دمياط' },
+  { en: 'Ismailia',       ar: 'الإسماعيلية' },
+  { en: 'Faiyum',         ar: 'الفيوم' },
+  { en: 'Beni Suef',      ar: 'بني سويف' },
+  { en: 'Minya',          ar: 'المنيا' },
+  { en: 'Asyut',          ar: 'أسيوط' },
+  { en: 'Sohag',          ar: 'سوهاج' },
+  { en: 'Qena',           ar: 'قنا' },
+  { en: 'Luxor',          ar: 'الأقصر' },
+  { en: 'Aswan',          ar: 'أسوان' },
+  { en: 'Red Sea',        ar: 'البحر الأحمر' },
+  { en: 'New Valley',     ar: 'الوادي الجديد' },
+  { en: 'Matrouh',        ar: 'مطروح' },
+  { en: 'North Sinai',    ar: 'شمال سيناء' },
+  { en: 'South Sinai',    ar: 'جنوب سيناء' },
 ];
 
 const EXPERIENCE_OPTS = [
@@ -78,7 +95,7 @@ const EXPERIENCE_OPTS = [
 ];
 
 const STEP1_FIELDS: FieldKey[] = ['fullName', 'mobile', 'email', 'password', 'confirmPassword'];
-const STEP2_FIELDS: FieldKey[] = ['specialization', 'country', 'yearsExperience', 'city'];
+const STEP2_FIELDS: FieldKey[] = ['specialization', 'yearsExperience', 'city'];
 const STEP3_FIELDS: FieldKey[] = ['termsAccepted'];
 
 /* ══════════════════════════════════════════════════════════════
@@ -94,20 +111,20 @@ const T = {
       fullName: 'Full Name', mobile: 'Mobile Number', email: 'Email Address',
       password: 'Password', confirmPassword: 'Confirm Password',
       specialization: 'Engineering Discipline', otherSpec: 'Specify Specialization',
-      company: 'Company (Optional)', country: 'Country',
+      company: 'Company (Optional)',
       licenseNumber: 'Engineering Syndicate Number (Optional)',
       engineeringCard: 'Upload Engineering Card (Optional)',
-      yearsExperience: 'Years of Experience', city: 'City',
+      yearsExperience: 'Years of Experience', city: 'Governorate',
       termsAccepted: '',
     },
     placeholders: {
       fullName: 'Eng. Ahmed Al-Rashidi', mobile: '+20 1X XXX XXXX',
       email: 'eng@example.com', password: 'Min. 8 characters',
       confirmPassword: 'Re-enter password', otherSpec: 'Enter your specialization',
-      company: 'Your company or firm', country: 'Select country',
+      company: 'Your company or firm',
       licenseNumber: 'Syndicate membership number',
       uploadCard: 'Choose a file (PDF, JPG, PNG)',
-      city: 'Select city',
+      city: 'Select governorate',
     },
     terms: 'I agree to the Terms of Service and Privacy Policy',
     loginPrompt: 'Already have an account?',
@@ -116,7 +133,7 @@ const T = {
       'Receive RFQs and procurement requests from top contractors',
       'Build your verified profile and grow your professional network',
     ],
-    tags: ['🏗 Construction', '🌍 Middle East', '🔒 Verified'],
+    tags: ['🏗 Construction', '🇪🇬 Egypt', '🔒 Verified'],
     stepTitle: ['Your Information', 'Professional Details', 'Review & Confirm'],
     stepSub: [
       'Create your engineer account',
@@ -126,8 +143,7 @@ const T = {
     verificationLabel: 'Verification',
     selectSpec: 'Select specialization',
     selectExp: 'Select experience',
-    selectCity: 'Select city',
-    selectCountry: 'Select country',
+    selectCity: 'Select governorate',
     success: 'Account created! Redirecting…',
     pwStrength: ['', 'Weak', 'Fair', 'Good', 'Strong'],
   },
@@ -139,20 +155,20 @@ const T = {
       fullName: 'الاسم الكامل', mobile: 'رقم الجوال', email: 'البريد الإلكتروني',
       password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
       specialization: 'التخصص الهندسي', otherSpec: 'حدد التخصص',
-      company: 'الشركة (اختياري)', country: 'الدولة',
+      company: 'الشركة (اختياري)',
       licenseNumber: 'رقم نقابة المهندسين (اختياري)',
       engineeringCard: 'رفع كارنيه نقابة المهندسين (اختياري)',
-      yearsExperience: 'سنوات الخبرة', city: 'المدينة',
+      yearsExperience: 'سنوات الخبرة', city: 'المحافظة',
       termsAccepted: '',
     },
     placeholders: {
       fullName: 'م. أحمد الرشيدي', mobile: '+20 1X XXX XXXX',
       email: 'eng@example.com', password: '٨ أحرف على الأقل',
       confirmPassword: 'أعد إدخال كلمة المرور', otherSpec: 'أدخل تخصصك',
-      company: 'شركتك أو مكتبك الهندسي', country: 'اختر الدولة',
+      company: 'شركتك أو مكتبك الهندسي',
       licenseNumber: 'رقم عضوية النقابة',
       uploadCard: 'اختر ملفاً (PDF, JPG, PNG)',
-      city: 'اختر المدينة',
+      city: 'اختر المحافظة',
     },
     terms: 'أوافق على شروط الخدمة وسياسة الخصوصية',
     loginPrompt: 'لديك حساب بالفعل؟',
@@ -161,7 +177,7 @@ const T = {
       'احصل على طلبات عروض الأسعار من كبار المقاولين',
       'ابنِ ملفك المهني المعتمد ووسّع شبكة علاقاتك',
     ],
-    tags: ['🏗 إنشاءات', '🌍 الشرق الأوسط', '🔒 موثّق'],
+    tags: ['🏗 إنشاءات', '🇪🇬 مصر', '🔒 موثّق'],
     stepTitle: ['معلوماتك', 'التفاصيل المهنية', 'المراجعة والتأكيد'],
     stepSub: [
       'أنشئ حسابك كمهندس',
@@ -171,8 +187,7 @@ const T = {
     verificationLabel: 'التحقق',
     selectSpec: 'اختر التخصص',
     selectExp: 'اختر سنوات الخبرة',
-    selectCity: 'اختر المدينة',
-    selectCountry: 'اختر الدولة',
+    selectCity: 'اختر المحافظة',
     success: 'تم إنشاء الحساب! جارٍ التحويل…',
     pwStrength: ['', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'],
   },
@@ -200,8 +215,6 @@ function validate(data: FormData, step: Step): FieldErrors {
     e.confirmPassword = 'Passwords do not match';
   if (fields.includes('specialization') && !data.specialization)
     e.specialization = 'Please select your specialization';
-  if (fields.includes('country') && !data.country)
-    e.country = 'Please select your country';
   if (fields.includes('yearsExperience') && !data.yearsExperience)
     e.yearsExperience = 'Please select years of experience';
   if (fields.includes('city') && !data.city)
@@ -231,7 +244,7 @@ function EngineerRegisterPageInner() {
 
   const [form, setForm] = useState<FormData>({
     fullName: '', mobile: '', email: '', password: '', confirmPassword: '',
-    specialization: '', otherSpec: '', company: '', country: '',
+    specialization: '', otherSpec: '', company: '',
     licenseNumber: '', yearsExperience: '', city: '', termsAccepted: false,
   });
   const [errors, setErrors]   = useState<FieldErrors>({});
@@ -391,18 +404,6 @@ function EngineerRegisterPageInner() {
                           value={form.company} onChange={e => set('company', e.target.value)} />
                       </FormField>
 
-                      <FormField label={t.labels.country} error={err('country')} classPrefix="er">
-                        <select className={`er-select ${err('country') ? 'has-error' : ''}`}
-                          value={form.country} onChange={e => set('country', e.target.value)}>
-                          <option value="">{t.selectCountry}</option>
-                          {COUNTRIES.map(c => (
-                            <option key={c.id} value={c.id}>{isArabic ? c.ar : c.en}</option>
-                          ))}
-                        </select>
-                      </FormField>
-                    </div>
-
-                    <div className="er-row-2">
                       <FormField label={t.labels.yearsExperience} error={err('yearsExperience')} classPrefix="er">
                         <select className={`er-select ${err('yearsExperience') ? 'has-error' : ''}`}
                           value={form.yearsExperience} onChange={e => set('yearsExperience', e.target.value)}>
@@ -412,15 +413,17 @@ function EngineerRegisterPageInner() {
                           ))}
                         </select>
                       </FormField>
-
-                      <FormField label={t.labels.city} error={err('city')} classPrefix="er">
-                        <select className={`er-select ${err('city') ? 'has-error' : ''}`}
-                          value={form.city} onChange={e => set('city', e.target.value)}>
-                          <option value="">{t.selectCity}</option>
-                          {KSA_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </FormField>
                     </div>
+
+                    <FormField label={t.labels.city} error={err('city')} classPrefix="er">
+                      <select className={`er-select ${err('city') ? 'has-error' : ''}`}
+                        value={form.city} onChange={e => set('city', e.target.value)}>
+                        <option value="">{t.selectCity}</option>
+                        {EGYPT_GOVERNORATES.map(g => (
+                          <option key={g.en} value={g.en}>{isArabic ? g.ar : g.en}</option>
+                        ))}
+                      </select>
+                    </FormField>
 
                     <div className="er-section-label">{t.verificationLabel}</div>
 
@@ -456,14 +459,11 @@ function EngineerRegisterPageInner() {
                         value={SPECIALIZATIONS.find(s => s.id === form.specialization)?.[isArabic ? 'ar' : 'en'] || form.otherSpec || '—'}
                         classPrefix="er" />
                       {form.company && <ReviewRow label={isArabic ? 'الشركة' : 'Company'} value={form.company} classPrefix="er" />}
-                      <ReviewRow label={isArabic ? 'الدولة' : 'Country'}
-                        value={COUNTRIES.find(c => c.id === form.country)?.[isArabic ? 'ar' : 'en'] || '—'}
-                        classPrefix="er" />
                       {form.licenseNumber && <ReviewRow label={isArabic ? 'رقم النقابة' : 'Syndicate No.'} value={form.licenseNumber} classPrefix="er" />}
                       <ReviewRow label={isArabic ? 'الخبرة' : 'Experience'}
                         value={EXPERIENCE_OPTS.find(o => o.id === form.yearsExperience)?.[isArabic ? 'ar' : 'en'] || '—'}
                         classPrefix="er" />
-                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} classPrefix="er" />
+                      <ReviewRow label={isArabic ? 'المحافظة' : 'Governorate'} value={form.city} classPrefix="er" />
                     </div>
 
                     <label className={`er-terms ${err('termsAccepted') ? 'has-error' : ''}`}>

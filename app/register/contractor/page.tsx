@@ -81,10 +81,34 @@ const YEARS_IN_BUSINESS_OPTS = [
   { id: '15+',   en: 'More than 15 years', ar: 'أكثر من 15 سنة' },
 ];
 
-const KSA_CITIES = [
-  'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar',
-  'Dhahran', 'Jubail', 'Tabuk', 'Abha', 'Hail', 'Najran',
-  'Taif', 'Yanbu', 'Buraidah', 'Khamis Mushait', 'Qatif',
+const EGYPT_GOVERNORATES = [
+  { en: 'Cairo',          ar: 'القاهرة' },
+  { en: 'Giza',           ar: 'الجيزة' },
+  { en: 'Alexandria',     ar: 'الإسكندرية' },
+  { en: 'Qalyubia',       ar: 'القليوبية' },
+  { en: 'Port Said',      ar: 'بورسعيد' },
+  { en: 'Suez',           ar: 'السويس' },
+  { en: 'Dakahlia',       ar: 'الدقهلية' },
+  { en: 'Sharqia',        ar: 'الشرقية' },
+  { en: 'Gharbia',        ar: 'الغربية' },
+  { en: 'Monufia',        ar: 'المنوفية' },
+  { en: 'Beheira',        ar: 'البحيرة' },
+  { en: 'Kafr El Sheikh', ar: 'كفر الشيخ' },
+  { en: 'Damietta',       ar: 'دمياط' },
+  { en: 'Ismailia',       ar: 'الإسماعيلية' },
+  { en: 'Faiyum',         ar: 'الفيوم' },
+  { en: 'Beni Suef',      ar: 'بني سويف' },
+  { en: 'Minya',          ar: 'المنيا' },
+  { en: 'Asyut',          ar: 'أسيوط' },
+  { en: 'Sohag',          ar: 'سوهاج' },
+  { en: 'Qena',           ar: 'قنا' },
+  { en: 'Luxor',          ar: 'الأقصر' },
+  { en: 'Aswan',          ar: 'أسوان' },
+  { en: 'Red Sea',        ar: 'البحر الأحمر' },
+  { en: 'New Valley',     ar: 'الوادي الجديد' },
+  { en: 'Matrouh',        ar: 'مطروح' },
+  { en: 'North Sinai',    ar: 'شمال سيناء' },
+  { en: 'South Sinai',    ar: 'جنوب سيناء' },
 ];
 
 const STEP1_FIELDS: FieldKey[] = ['companyName', 'contactPerson', 'mobile', 'email', 'password', 'confirmPassword'];
@@ -107,7 +131,7 @@ const T = {
       workTypes: 'Main Activity (select all that apply)',
       companySize: 'Company Size', crNumber: 'Commercial Registration No. (CR)',
       taxNumber: 'Tax Number (Optional)', countriesServed: 'Countries Served',
-      yearsInBusiness: 'Years in Business', city: 'City',
+      yearsInBusiness: 'Years in Business', city: 'Governorate',
       crUpload: 'Upload Commercial Registration (Optional)',
       logoUpload: 'Upload Company Logo (Optional)',
     },
@@ -125,12 +149,12 @@ const T = {
       'Get competitive quotes from verified suppliers instantly',
       'Manage all procurement in one platform — BOQ to delivery',
     ],
-    tags: ['🏗 Construction', '🌍 Middle East', '⚡ Procurement'],
+    tags: ['🏗 Construction', '🇪🇬 Egypt', '⚡ Procurement'],
     stepTitle: ['Company Information', 'Work & Operations', 'Review & Confirm'],
     stepSub: ['Set up your contractor account', 'Tell us what you build', 'Almost there'],
     verificationLabel: 'Verification',
     selectSize: 'Select company size',
-    selectCity: 'Select city',
+    selectCity: 'Select governorate',
     selectYears: 'Select years in business',
     selectWorkTypes: 'Select at least one work type',
     success: 'Account created! Redirecting…',
@@ -147,7 +171,7 @@ const T = {
       workTypes: 'النشاط الرئيسي (اختر كل ما ينطبق)',
       companySize: 'حجم الشركة', crNumber: 'رقم السجل التجاري',
       taxNumber: 'الرقم الضريبي (اختياري)', countriesServed: 'الدول التي تخدمها',
-      yearsInBusiness: 'سنوات العمل', city: 'المدينة',
+      yearsInBusiness: 'سنوات العمل', city: 'المحافظة',
       crUpload: 'رفع السجل التجاري (اختياري)',
       logoUpload: 'رفع شعار الشركة (اختياري)',
     },
@@ -165,12 +189,12 @@ const T = {
       'احصل على عروض أسعار تنافسية من موردين معتمدين فوراً',
       'إدارة جميع المشتريات في منصة واحدة — من جدول الكميات للتسليم',
     ],
-    tags: ['🏗 إنشاءات', '🌍 الشرق الأوسط', '⚡ مشتريات'],
+    tags: ['🏗 إنشاءات', '🇪🇬 مصر', '⚡ مشتريات'],
     stepTitle: ['معلومات الشركة', 'الأعمال والعمليات', 'المراجعة والتأكيد'],
     stepSub: ['أنشئ حساب المقاول الخاص بك', 'أخبرنا بما تنفّذه', 'خطوة أخيرة'],
     verificationLabel: 'التحقق',
     selectSize: 'اختر حجم الشركة',
-    selectCity: 'اختر المدينة',
+    selectCity: 'اختر المحافظة',
     selectYears: 'اختر سنوات العمل',
     selectWorkTypes: 'اختر نوع عمل واحداً على الأقل',
     success: 'تم إنشاء الحساب! جارٍ التحويل…',
@@ -394,7 +418,9 @@ function ContractorRegisterPageInner() {
                         <select className={`cr-select ${err('city') ? 'has-error' : ''}`}
                           value={form.city} onChange={e => set('city', e.target.value)}>
                           <option value="">{t.selectCity}</option>
-                          {KSA_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                          {EGYPT_GOVERNORATES.map(g => (
+                            <option key={g.en} value={g.en}>{isArabic ? g.ar : g.en}</option>
+                          ))}
                         </select>
                       </FormField>
                     </div>
@@ -478,7 +504,7 @@ function ContractorRegisterPageInner() {
                       <ReviewRow label={isArabic ? 'حجم الشركة' : 'Company Size'}
                         value={COMPANY_SIZES.find(s => s.id === form.companySize)?.[isArabic ? 'ar' : 'en'] || '—'}
                         classPrefix="cr" />
-                      <ReviewRow label={isArabic ? 'المدينة' : 'City'} value={form.city} classPrefix="cr" />
+                      <ReviewRow label={isArabic ? 'المحافظة' : 'Governorate'} value={form.city} classPrefix="cr" />
                       {form.yearsInBusiness && (
                         <ReviewRow label={isArabic ? 'سنوات العمل' : 'Years in Business'}
                           value={YEARS_IN_BUSINESS_OPTS.find(o => o.id === form.yearsInBusiness)?.[isArabic ? 'ar' : 'en'] || '—'}
