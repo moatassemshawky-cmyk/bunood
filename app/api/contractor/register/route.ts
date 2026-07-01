@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
   const {
     companyName, contactPerson, mobile, email, password, confirmPassword,
-    workTypes, companySize, crNumber, city, termsAccepted,
+    workTypes, companySize, crNumber, taxNumber, countriesServed, yearsInBusiness, city, termsAccepted,
   } = body as Record<string, unknown>;
 
   /* ── Validate ────────────────────────────────────────────── */
@@ -55,8 +55,9 @@ export async function POST(request: Request) {
     const { rows } = await client.query<{ id: number }>(
       `INSERT INTO contractors
          (company_name, contact_person, mobile, email, password_hash,
-          work_types, company_size, cr_number, city, terms_accepted)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          work_types, company_size, cr_number, tax_number, countries_served,
+          years_in_business, city, terms_accepted)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING id`,
       [
         (companyName as string).trim(),
@@ -67,6 +68,9 @@ export async function POST(request: Request) {
         workTypes,
         companySize,
         (crNumber as string | undefined) || null,
+        (taxNumber as string | undefined) || null,
+        (Array.isArray(countriesServed) ? countriesServed : []) as string[],
+        (yearsInBusiness as string | undefined) || null,
         city,
         true,
       ]

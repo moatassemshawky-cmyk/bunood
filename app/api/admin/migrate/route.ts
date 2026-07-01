@@ -65,6 +65,8 @@ export async function POST(request: Request) {
         password_hash        TEXT        NOT NULL,
         specialization       TEXT        NOT NULL,
         other_specialization TEXT,
+        company              TEXT,
+        country              TEXT,
         license_number       TEXT,
         years_experience     TEXT        NOT NULL,
         city                 TEXT        NOT NULL,
@@ -97,6 +99,9 @@ export async function POST(request: Request) {
         work_types      TEXT[]      NOT NULL DEFAULT '{}',
         company_size    TEXT        NOT NULL,
         cr_number       TEXT,
+        tax_number        TEXT,
+        countries_served  TEXT[]      NOT NULL DEFAULT '{}',
+        years_in_business TEXT,
         city            TEXT        NOT NULL,
         terms_accepted  BOOLEAN     NOT NULL DEFAULT FALSE,
         status          TEXT        NOT NULL DEFAULT 'pending',
@@ -115,7 +120,14 @@ export async function POST(request: Request) {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_contractor_sessions_cid ON contractor_sessions(contractor_id)`);
 
-    /* ── 6. Auto-update updated_at ───────────────────────────── */
+    /* ── 6. Phase 2 columns (idempotent against tables that already existed) ── */
+    await client.query(`ALTER TABLE engineers   ADD COLUMN IF NOT EXISTS company TEXT`);
+    await client.query(`ALTER TABLE engineers   ADD COLUMN IF NOT EXISTS country TEXT`);
+    await client.query(`ALTER TABLE contractors ADD COLUMN IF NOT EXISTS tax_number TEXT`);
+    await client.query(`ALTER TABLE contractors ADD COLUMN IF NOT EXISTS countries_served TEXT[] NOT NULL DEFAULT '{}'`);
+    await client.query(`ALTER TABLE contractors ADD COLUMN IF NOT EXISTS years_in_business TEXT`);
+
+    /* ── 7. Auto-update updated_at ───────────────────────────── */
     await client.query(`
       CREATE OR REPLACE FUNCTION set_updated_at()
       RETURNS TRIGGER LANGUAGE plpgsql AS $$

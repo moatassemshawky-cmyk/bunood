@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
   const {
     fullName, mobile, email, password, confirmPassword,
-    specialization, otherSpec, licenseNumber, yearsExperience, city, termsAccepted,
+    specialization, otherSpec, company, country, licenseNumber, yearsExperience, city, termsAccepted,
   } = body as Record<string, unknown>;
 
   /* ── Validate ────────────────────────────────────────────── */
@@ -53,8 +53,8 @@ export async function POST(request: Request) {
     const { rows } = await client.query<{ id: number }>(
       `INSERT INTO engineers
          (full_name, mobile, email, password_hash, specialization, other_specialization,
-          license_number, years_experience, city, terms_accepted)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          company, country, license_number, years_experience, city, terms_accepted)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        RETURNING id`,
       [
         (fullName as string).trim(),
@@ -63,6 +63,8 @@ export async function POST(request: Request) {
         passwordHash,
         specialization,
         (otherSpec as string | undefined) || null,
+        (company as string | undefined) || null,
+        (country as string | undefined) || null,
         (licenseNumber as string | undefined) || null,
         yearsExperience,
         city,
