@@ -74,7 +74,7 @@
   /* Keep hero inside the first viewport: prefer slightly shorter than full viewport.
      min-height (not height) so taller content grows the box instead of being clipped. */
   min-height: min(95svh, calc(100svh - var(--header-h)));
-  background: url('/hero-bg.jpg') right center / 85% auto no-repeat #0f1117;
+  background: url('/hero-bg.jpg') right center / cover no-repeat #0f1117;
   overflow-x: hidden;
   display: flex;
   align-items: stretch;
@@ -122,6 +122,9 @@
   /* reduce vertical padding so ledger doesn't push the hero taller */
   padding: clamp(20px, 4.5vh, 48px) clamp(16px, 2vw, 32px);
   display: flex; align-items: center; justify-content: flex-end;
+  /* grid items default to min-width:auto, refusing to shrink below content size;
+     min-width:0 lets this column actually respect its grid track width */
+  min-width: 0;
 }
 
 /* RTL: ledger on right, push card toward centre (flex-start = toward left/copy) */
@@ -138,6 +141,9 @@
   display: flex; flex-direction: column; justify-content: center;
   gap: 8px;
   animation: bn-copy-rise 1s cubic-bezier(.2,.7,.2,1) .28s both;
+  /* grid items default to min-width:auto, refusing to shrink below content size;
+     min-width:0 lets this column actually respect its grid track width */
+  min-width: 0;
 }
 
 /* RTL: copy on left edge */
@@ -217,6 +223,7 @@
 /* ---- Hero trust stats row ----------------------------------------- */
 .bn-hero-stats {
   display: flex;
+  width: 100%;
   gap: 0;
   margin-top: 24px;
   background: rgba(255,255,255,.04);
@@ -317,7 +324,7 @@
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
-  .bn-hero { background-size: 92% auto; }
+  .bn-hero { background-size: cover; }
   .bn-hero-stage { grid-template-columns: 52fr 48fr; }
   .bn-hero-ledger-col { padding-left: clamp(16px, 3vh, 36px); padding-right: clamp(12px, 2vw, 24px); }
   .bn-hero-copy-col   { padding-left: clamp(24px, 4vw, 56px); padding-right: clamp(12px, 2vw, 24px); }
