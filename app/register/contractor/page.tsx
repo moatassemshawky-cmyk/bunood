@@ -545,7 +545,7 @@ function ContractorRegisterPageInner() {
 
                 <p className="cr-login-link">
                   {t.loginPrompt}{' '}
-                  <a href={`/contractor/login${isArabic ? '?lang=ar' : ''}`}>{t.nav.login}</a>
+                  <a href={`/login${isArabic ? '?lang=ar' : ''}`}>{t.nav.login}</a>
                 </p>
               </form>
             )}

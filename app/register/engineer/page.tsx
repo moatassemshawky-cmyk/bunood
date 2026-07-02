@@ -491,7 +491,7 @@ function EngineerRegisterPageInner() {
 
                 <p className="er-login-link">
                   {t.loginPrompt}{' '}
-                  <a href={`/engineer/login${isArabic ? '?lang=ar' : ''}`}>{t.nav.login}</a>
+                  <a href={`/login${isArabic ? '?lang=ar' : ''}`}>{t.nav.login}</a>
                 </p>
               </form>
             )}

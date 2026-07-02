@@ -41,7 +41,7 @@ async function getSupplier(): Promise<Supplier | null> {
 
 export default async function SupplierDashboard() {
   const supplier = await getSupplier();
-  if (!supplier) redirect('/supplier/login');
+  if (!supplier) redirect('/login');
 
   const initials = supplier.company_name
     .split(' ')

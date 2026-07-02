@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './page.css';
 
-export default function SupplierLoginPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
@@ -19,14 +19,14 @@ export default function SupplierLoginPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/supplier/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error ?? 'Login failed.'); setLoading(false); return; }
-      router.push('/supplier/dashboard');
+      router.push(json.redirectTo);
     } catch {
       setError('Network error. Check your connection.');
       setLoading(false);
@@ -57,8 +57,8 @@ export default function SupplierLoginPage() {
       {/* Form side */}
       <main className="sl-form-panel">
         <div className="sl-form-inner">
-          <h1 className="sl-title">Supplier Sign In</h1>
-          <p className="sl-sub">Sign in to your supplier account to manage RFQs and quotes.</p>
+          <h1 className="sl-title">Welcome Back</h1>
+          <p className="sl-sub">Sign in to your Bunood account to continue.</p>
 
           <form className="sl-form" onSubmit={submit} noValidate>
             <div className="sl-field">
@@ -123,7 +123,13 @@ export default function SupplierLoginPage() {
 
           <p className="sl-register">
             Don&apos;t have an account?
-            <a href="/register/supplier" className="sl-link">Register as a supplier</a>
+            <span className="sl-register-links">
+              <a href="/register/engineer" className="sl-link">Engineer</a>
+              <span className="sl-sep">|</span>
+              <a href="/register/contractor" className="sl-link">Contractor</a>
+              <span className="sl-sep">|</span>
+              <a href="/register/supplier" className="sl-link">Supplier</a>
+            </span>
           </p>
         </div>
       </main>

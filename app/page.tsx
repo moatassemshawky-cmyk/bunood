@@ -285,7 +285,7 @@ export default function Home() {
           <Logo />
           <div className="bn-nav-ctas">
             <button onClick={openModal} className="bn-btn bn-btn-ghost bn-btn-sm">{t.nav.signup}</button>
-            <a href="/supplier/login" className="bn-btn bn-btn-sm">{t.nav.login}</a>
+            <a href="/login" className="bn-btn bn-btn-sm">{t.nav.login}</a>
           </div>
           <nav className="bn-nav" aria-label="Main navigation">
             <a href="#how" className="bn-navlink">{t.nav.whatWeDo}</a>

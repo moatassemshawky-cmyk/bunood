@@ -1,4 +1,4 @@
-/* bunood — Supplier Login */
+/* bunood — Unified Sign In */
 
 .sl-root {
   --blue: #2f6fe0;
@@ -181,17 +181,25 @@
 .sl-btn:active:not(:disabled) { transform: none; }
 .sl-btn:disabled { opacity: .65; cursor: not-allowed; }
 
-/* Register link */
+/* Register links */
 .sl-register {
   margin-top: 24px;
   font-size: 13.5px;
   color: #8591a0;
   text-align: center;
 }
+.sl-register-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.sl-sep { color: #c3cad3; font-size: 12px; }
 .sl-link {
   color: var(--blue);
   text-decoration: none;
-  margin-left: 4px;
   font-weight: 500;
 }
 .sl-link:hover { text-decoration: underline; }
