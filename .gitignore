@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray local scratch/automation scripts (not part of the app)
+__*.bat
+__*.vbs
+__*.ps1
+__*.txt
