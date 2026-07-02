@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { createNeonClient } from '../../../lib/neon';
+import { withClient } from '../../../lib/db';
+import { getSessionAccount } from '../../../lib/auth';
 import './page.css';
 
 interface Supplier {
@@ -17,26 +18,19 @@ interface Supplier {
 async function getSupplier(): Promise<Supplier | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('bn_supplier_session')?.value;
-  if (!token) return null;
+  const session = await getSessionAccount('supplier', token);
+  if (!session) return null;
 
-  const client = createNeonClient();
-  try {
-    await client.connect();
+  // getSessionAccount only returns id/name/email — this page also needs
+  // categories/delivery_areas/status, so fetch the full row for the validated id.
+  return withClient(async (client) => {
     const { rows } = await client.query<Supplier>(
-      `SELECT s.id, s.company_name, s.contact_person, s.email,
-              s.categories, s.delivery_areas, s.status
-       FROM suppliers s
-       JOIN supplier_sessions ss ON ss.supplier_id = s.id
-       WHERE ss.token = $1 AND ss.expires_at > NOW()
-       LIMIT 1`,
-      [token],
+      `SELECT id, company_name, contact_person, email, categories, delivery_areas, status
+       FROM suppliers WHERE id = $1`,
+      [session.id],
     );
     return rows[0] ?? null;
-  } catch {
-    return null;
-  } finally {
-    await client.end().catch(() => {});
-  }
+  });
 }
 
 export default async function SupplierDashboard() {
@@ -102,7 +96,7 @@ export default async function SupplierDashboard() {
           </a>
         </nav>
 
-        <form action="/api/supplier/logout" method="POST" className="sd-logout-form">
+        <form action="/api/auth/logout" method="POST" className="sd-logout-form">
           <button type="submit" className="sd-logout">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

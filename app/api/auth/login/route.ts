@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { login } from '../../../../lib/auth';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { login, EMAIL_RE } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
