@@ -1,6 +1,3 @@
-/* Tailwind v4 (created by create-next-app). Keep this import. */
-@import "tailwindcss";
-
 :root {
   --font-display: "Segoe UI", "Readex Pro", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-arabic: "Segoe UI", "IBM Plex Sans Arabic", "Noto Sans Arabic", system-ui, sans-serif;
