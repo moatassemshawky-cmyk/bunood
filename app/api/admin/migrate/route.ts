@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createNeonClient } from '../../../../lib/neon';
+import { withClient } from '../../../../lib/db';
 
 /**
  * One-time DB migration.
@@ -15,9 +15,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const client = createNeonClient();
   try {
-    await client.connect();
+    return await withClient(async (client) => {
 
     /* ── 1. Drop legacy tables ───────────────────────────────── */
     await client.query(`DROP TABLE IF EXISTS early_access_signups CASCADE`);
@@ -147,10 +146,9 @@ export async function POST(request: Request) {
     `);
 
     return NextResponse.json({ success: true, message: 'Migration complete — suppliers, engineers, contractors' });
+    });
   } catch (err) {
     console.error('[migrate]', err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
-  } finally {
-    await client.end().catch(() => {});
   }
 }

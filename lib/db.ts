@@ -1,26 +1,28 @@
 import { Client } from '@neondatabase/serverless';
 
 function getConnectionString(): string {
-  return (
+  const cs =
     process.env.NEON_DATABASE_URL ||
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    ''
-  );
+    process.env.POSTGRES_PRISMA_URL;
+
+  if (!cs) {
+    throw new Error('Missing database connection string. Set NEON_DATABASE_URL or DATABASE_URL.');
+  }
+  return cs;
 }
 
+/**
+ * Single DB access point for the whole app: opens a connection, runs fn,
+ * always closes the connection afterward — even if fn throws.
+ */
 export async function withClient<T>(fn: (client: Client) => Promise<T>): Promise<T> {
-  const cs = getConnectionString();
-  if (!cs) throw new Error('Missing DB connection string');
-  const client = new Client({ connectionString: cs });
+  const client = new Client({ connectionString: getConnectionString() });
   try {
     await client.connect();
     return await fn(client);
-  } catch (err) {
-    console.error('[db] error', err);
-    throw err;
   } finally {
-    try { await client.end(); } catch { /* ignore */ }
+    await client.end().catch(() => {});
   }
 }

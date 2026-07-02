@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createNeonClient } from '../../../lib/neon';
+import { withClient } from '../../../lib/db';
 
 /** Debug/health-check endpoint — secured with ADMIN_SECRET. */
 export async function GET(request: Request) {
@@ -8,15 +8,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const client = createNeonClient();
   try {
-    await client.connect();
-    const result = await client.query('SELECT NOW()');
-    return NextResponse.json({ now: result.rows[0].now, status: 'ok' });
+    return await withClient(async (client) => {
+      const result = await client.query('SELECT NOW()');
+      return NextResponse.json({ now: result.rows[0].now, status: 'ok' });
+    });
   } catch (error) {
     console.error('[neon] DB connection error:', error);
     return NextResponse.json({ error: 'DB connection failed' }, { status: 500 });
-  } finally {
-    await client.end().catch(() => {});
   }
 }
